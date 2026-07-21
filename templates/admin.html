@@ -1,0 +1,2401 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FeeFlow — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Clash+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+<style>
+/* ════════════════════════════════════════════════
+   DESIGN TOKENS
+════════════════════════════════════════════════ */
+:root {
+  /* Canvas */
+  --bg:       #060810;
+  --bg1:      #0b0f1a;
+  --bg2:      #101523;
+  --bg3:      #161c2e;
+  --bg4:      #1d2540;
+  --bg-glass: rgba(11,15,26,0.72);
+
+  /* Borders */
+  --bd:  rgba(255,255,255,.055);
+  --bd2: rgba(255,255,255,.10);
+  --bd3: rgba(255,255,255,.17);
+
+  /* Text */
+  --tx:    #e2e8f8;
+  --muted: #6b7ba4;
+  --faint: #384060;
+
+  /* Accents */
+  --blue:  #4f8dff;
+  --blue2: #7c63ff;
+  --teal:  #12d4a0;
+  --rose:  #ff3d5c;
+  --amber: #ffb340;
+
+  /* Accent BGs */
+  --blue-bg:  rgba(79,141,255,.10);
+  --blue2-bg: rgba(124,99,255,.10);
+  --teal-bg:  rgba(18,212,160,.10);
+  --rose-bg:  rgba(255,61,92,.10);
+  --amber-bg: rgba(255,179,64,.10);
+
+  /* Glow */
+  --blue-glow:  0 0 24px rgba(79,141,255,.25);
+  --teal-glow:  0 0 24px rgba(18,212,160,.20);
+  --rose-glow:  0 0 24px rgba(255,61,92,.20);
+
+  /* Shape */
+  --r:   14px;
+  --r-s: 9px;
+  --r-xs:6px;
+
+  /* Shadow */
+  --shadow:    0 4px 24px rgba(0,0,0,.55);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,.75);
+
+  /* Type */
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  /* Layout */
+  --sw: 256px;
+  --hh: 60px;
+  --trans: 160ms cubic-bezier(.16,1,.3,1);
+}
+
+[data-theme="light"] {
+  --bg:  #f0f3fc;
+  --bg1: #ffffff;
+  --bg2: #edf0fa;
+  --bg3: #e5e9f5;
+  --bg4: #d9dff0;
+  --bg-glass: rgba(255,255,255,0.80);
+  --bd:  rgba(0,0,0,.07);
+  --bd2: rgba(0,0,0,.11);
+  --bd3: rgba(0,0,0,.18);
+  --tx:  #0c1020;
+  --muted: #5e6c98;
+  --faint: #9aa3c0;
+  --shadow:    0 4px 24px rgba(0,0,0,.08);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,.14);
+}
+
+/* ════════════════════════════════════════════════
+   RESET & BASE
+════════════════════════════════════════════════ */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--tx);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { border: none; background: none; cursor: pointer; }
+a { text-decoration: none; color: inherit; }
+table { width: 100%; border-collapse: collapse; }
+
+.ico {
+  font-family: 'Material Symbols Rounded';
+  font-variation-settings: 'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;
+  line-height: 1; user-select: none; vertical-align: middle;
+}
+.ico.out { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+
+/* ════════════════════════════════════════════════
+   SKELETON
+════════════════════════════════════════════════ */
+.sk {
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--bg3) 0%, var(--bg4) 50%, var(--bg3) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+  display: inline-block;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════ */
+.toast-shelf {
+  position: fixed; right: 20px; bottom: 24px; z-index: 999;
+  display: flex; flex-direction: column; gap: 8px;
+  width: min(360px, calc(100vw - 40px));
+}
+.toast {
+  background: var(--bg2);
+  border: 1px solid var(--bd2);
+  border-radius: var(--r);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.05);
+  padding: 14px 16px;
+  display: flex; gap: 10px;
+  animation: tIn .2s cubic-bezier(.16,1,.3,1);
+}
+.toast.ok  { border-color: rgba(18,212,160,.3); }
+.toast.err { border-color: rgba(255,61,92,.3); }
+.toast.info{ border-color: rgba(79,141,255,.3); }
+.toast.ok  .t-ico { color: var(--teal); }
+.toast.err .t-ico { color: var(--rose); }
+.toast.info .t-ico{ color: var(--blue); }
+.t-ico    { font-size: 20px; flex: 0 0 auto; margin-top: 1px; }
+.t-title  { font-size: 12.5px; font-weight: 700; margin-bottom: 2px; }
+.t-desc   { font-size: 12px; color: var(--muted); }
+@keyframes tIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+
+/* ════════════════════════════════════════════════
+   OVERLAY & MODAL
+════════════════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.65);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--trans); z-index: 60;
+  backdrop-filter: blur(6px);
+}
+.overlay.on { opacity: 1; pointer-events: auto; }
+
+.modal {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -46%);
+  z-index: 70;
+  background: var(--bg1);
+  border: 1px solid var(--bd2);
+  border-radius: calc(var(--r) + 2px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,.06);
+  width: min(560px, calc(100vw - 28px));
+  max-height: 90dvh;
+  overflow: hidden; display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--trans), transform var(--trans);
+}
+.modal.on { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%); }
+.modal-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between;
+  flex: 0 0 auto;
+  background: linear-gradient(180deg, rgba(255,255,255,.025) 0%, transparent 100%);
+}
+.modal-title { font-size: 14px; font-weight: 700; letter-spacing: -.2px; }
+.modal-body  { padding: 22px; overflow-y: auto; flex: 1; }
+.close-btn {
+  width: 28px; height: 28px; border-radius: var(--r-xs);
+  border: 1px solid var(--bd2); background: var(--bg2);
+  display: grid; place-items: center;
+  transition: background var(--trans), border-color var(--trans);
+}
+.close-btn:hover { background: var(--bg3); border-color: var(--bd3); }
+
+/* ════════════════════════════════════════════════
+   SHELL LAYOUT
+════════════════════════════════════════════════ */
+.shell {
+  display: grid;
+  grid-template-columns: var(--sw) 1fr;
+  grid-template-rows: var(--hh) 1fr;
+  height: 100dvh; overflow: hidden;
+}
+
+/* ════════════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════════════ */
+.sidebar {
+  grid-row: 1 / -1;
+  display: flex; flex-direction: column;
+  background: var(--bg1);
+  border-right: 1px solid var(--bd);
+  width: var(--sw);
+  transition: width var(--trans), transform var(--trans);
+  z-index: 50; overflow: hidden;
+  position: relative;
+}
+/* Subtle gradient overlay on sidebar */
+.sidebar::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 200px;
+  background: linear-gradient(180deg, rgba(79,141,255,.04) 0%, transparent 100%);
+  pointer-events: none;
+}
+.sidebar.slim { width: 64px; }
+
+.s-brand {
+  min-height: var(--hh);
+  padding: 0 16px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid var(--bd);
+  flex: 0 0 auto; position: relative;
+}
+.logo-mark {
+  width: 36px; height: 36px; flex: 0 0 auto;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  display: grid; place-items: center; color: #fff;
+  box-shadow: var(--blue-glow), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.logo-mark .ico { font-size: 18px; }
+.brand-text { white-space: nowrap; }
+.brand-name {
+  font-size: 16px; font-weight: 800;
+  letter-spacing: -.5px; line-height: 1.1;
+}
+.brand-name em { color: var(--blue); font-style: normal; }
+.brand-tag {
+  font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .14em;
+  color: var(--muted); margin-top: 1px;
+}
+.slim .brand-text, .slim .nav-label, .slim .s-sect, .slim .s-logout-text { display: none; }
+
+.s-sect {
+  font-size: 9px; text-transform: uppercase;
+  letter-spacing: .2em; color: var(--faint);
+  padding: 18px 16px 5px; white-space: nowrap; flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 10px; display: flex; flex-direction: column; gap: 1px; }
+.nav::-webkit-scrollbar { width: 3px; }
+.nav::-webkit-scrollbar-track { background: transparent; }
+.nav::-webkit-scrollbar-thumb { background: var(--bd3); border-radius: 99px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  min-height: 38px; padding: 0 10px;
+  border-radius: var(--r-s); color: var(--muted);
+  cursor: pointer; white-space: nowrap;
+  transition: background var(--trans), color var(--trans);
+  position: relative; overflow: hidden;
+}
+.nav-item:hover { background: var(--bg2); color: var(--tx); }
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(79,141,255,.14) 0%, rgba(124,99,255,.08) 100%);
+  color: var(--blue);
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 22%; bottom: 22%;
+  width: 3px; border-radius: 99px;
+  background: linear-gradient(180deg, var(--blue), var(--blue2));
+}
+.nav-item .ico { font-size: 18px; flex: 0 0 auto; }
+.nav-label { font-size: 13px; font-weight: 500; }
+
+.s-footer { flex: 0 0 auto; padding: 8px 10px; border-top: 1px solid var(--bd); }
+.s-logout {
+  display: flex; align-items: center; gap: 11px;
+  min-height: 38px; padding: 0 10px;
+  border-radius: var(--r-s); color: var(--rose); width: 100%;
+  transition: background var(--trans);
+}
+.s-logout:hover { background: var(--rose-bg); }
+
+/* ════════════════════════════════════════════════
+   HEADER
+════════════════════════════════════════════════ */
+.header {
+  grid-column: 2;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 22px; gap: 12px;
+  position: sticky; top: 0; z-index: 40;
+}
+.h-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: var(--r-xs);
+  border: 1px solid var(--bd2); background: var(--bg2);
+  display: grid; place-items: center;
+  transition: background var(--trans), border-color var(--trans), transform var(--trans);
+  flex: 0 0 auto;
+}
+.icon-btn:hover { background: var(--bg3); border-color: var(--bd3); transform: translateY(-1px); }
+.page-title {
+  font-size: 15px; font-weight: 700; letter-spacing: -.3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.h-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.search-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg2); border: 1px solid var(--bd);
+  border-radius: var(--r-xs); padding: 0 12px;
+  height: 34px; min-width: 210px;
+  transition: border-color var(--trans), box-shadow var(--trans);
+}
+.search-wrap:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(79,141,255,.12); }
+.search-wrap input { border: none; outline: none; background: transparent; font-size: 13px; width: 100%; }
+.search-wrap input::placeholder { color: var(--muted); }
+
+.user-chip {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--bg2); border: 1px solid var(--bd);
+  border-radius: var(--r-xs); padding: 4px 12px 4px 4px;
+}
+.user-av {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  display: grid; place-items: center;
+  font-size: 11px; font-weight: 800; color: #fff;
+}
+.user-nm { font-size: 13px; font-weight: 600; }
+
+/* ════════════════════════════════════════════════
+   MAIN / PAGES
+════════════════════════════════════════════════ */
+.main { grid-column: 2; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
+.main::-webkit-scrollbar { width: 5px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--bd3); border-radius: 99px; }
+.page { display: none; flex-direction: column; gap: 20px; }
+.page.active { display: flex; animation: pgIn .22s cubic-bezier(.16,1,.3,1); }
+@keyframes pgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ════════════════════════════════════════════════
+   PAGE HEADER
+════════════════════════════════════════════════ */
+.ph { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.ph-info h2 { font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
+.ph-info p  { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.ph-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ════════════════════════════════════════════════
+   CARDS
+════════════════════════════════════════════════ */
+.card {
+  background: var(--bg1);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+}
+.card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+  background: linear-gradient(180deg, rgba(255,255,255,.018) 0%, transparent 100%);
+}
+.card-title {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .15em; color: var(--muted);
+}
+.card-body { padding: 16px 18px; }
+
+/* ════════════════════════════════════════════════
+   STAT CARDS
+════════════════════════════════════════════════ */
+.stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
+.stat-card {
+  background: var(--bg1);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  padding: 20px;
+  position: relative; overflow: hidden;
+  transition: transform var(--trans), box-shadow var(--trans), border-color var(--trans);
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--bd2); }
+.stat-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.018) 0%, transparent 60%);
+  pointer-events: none;
+}
+.stat-eyebrow {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .17em;
+  color: var(--muted); font-weight: 700; margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.stat-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 16px;
+}
+.stat-icon.blue  { background: var(--blue-bg);  color: var(--blue); }
+.stat-icon.teal  { background: var(--teal-bg);  color: var(--teal); }
+.stat-icon.rose  { background: var(--rose-bg);  color: var(--rose); }
+.stat-icon.amber { background: var(--amber-bg); color: var(--amber); }
+.stat-val { font-size: 32px; font-weight: 800; letter-spacing: -.8px; line-height: 1; margin-bottom: 10px; }
+.stat-sub { font-size: 11.5px; color: var(--muted); }
+.stat-accent {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; border-radius: 0 0 var(--r) var(--r);
+}
+.stat-accent.blue  { background: linear-gradient(90deg,transparent,var(--blue),transparent); }
+.stat-accent.teal  { background: linear-gradient(90deg,transparent,var(--teal),transparent); }
+.stat-accent.rose  { background: linear-gradient(90deg,transparent,var(--rose),transparent); }
+.stat-accent.amber { background: linear-gradient(90deg,transparent,var(--amber),transparent); }
+
+/* ════════════════════════════════════════════════
+   MID GRID (Dashboard)
+════════════════════════════════════════════════ */
+.mid-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; }
+
+.branch-list { display: flex; flex-direction: column; gap: 16px; }
+.br-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.br-name { font-size: 13px; font-weight: 600; }
+.br-pct  { font-size: 11px; font-weight: 700; font-family: var(--mono); color: var(--muted); }
+.bar-track { height: 5px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
+.bar-fill  { height: 100%; border-radius: inherit; transition: width 900ms cubic-bezier(.16,1,.3,1); }
+.br-meta { display: flex; gap: 14px; margin-top: 5px; font-size: 11px; color: var(--muted); }
+
+.qa-list { display: flex; flex-direction: column; gap: 7px; }
+.qa-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 13px; border-radius: var(--r-s);
+  border: 1px solid var(--bd); background: var(--bg2);
+  width: 100%; text-align: left;
+  transition: background var(--trans), border-color var(--trans), transform var(--trans);
+}
+.qa-btn:hover { background: var(--bg3); border-color: var(--bd2); transform: translateX(3px); }
+.qa-icon { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-size: 17px; flex: 0 0 auto; }
+.qa-text strong { display: block; font-size: 13px; font-weight: 700; }
+.qa-text small   { color: var(--muted); font-size: 11.5px; }
+
+/* ════════════════════════════════════════════════
+   TOOLBAR & FORM INPUTS
+════════════════════════════════════════════════ */
+.toolbar {
+  padding: 11px 18px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+.t-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.inp, .sel, .txta {
+  min-height: 34px; border-radius: var(--r-xs);
+  border: 1px solid var(--bd2);
+  background: var(--bg2); color: var(--tx);
+  padding: 0 11px; font-size: 13px;
+  transition: border-color var(--trans), background var(--trans), box-shadow var(--trans);
+}
+.txta { padding: 8px 11px; min-height: 90px; resize: vertical; }
+.inp:focus, .sel:focus, .txta:focus {
+  outline: none; border-color: var(--blue);
+  background: var(--bg1);
+  box-shadow: 0 0 0 3px rgba(79,141,255,.11);
+}
+
+/* ════════════════════════════════════════════════
+   BUTTONS
+════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; border-radius: var(--r-xs);
+  border: 1px solid var(--bd2); background: var(--bg2);
+  color: var(--tx); padding: 0 14px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background var(--trans), border-color var(--trans), transform var(--trans), box-shadow var(--trans);
+  white-space: nowrap;
+}
+.btn:hover { background: var(--bg3); transform: translateY(-1px); }
+.btn.primary {
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border-color: transparent; color: #fff;
+  box-shadow: 0 4px 16px rgba(79,141,255,.3);
+}
+.btn.primary:hover { box-shadow: 0 6px 20px rgba(79,141,255,.45); filter: brightness(1.05); }
+.btn.success {
+  background: linear-gradient(135deg, var(--teal), #0bbf8a);
+  border-color: transparent; color: #050e0a;
+  box-shadow: 0 4px 16px rgba(18,212,160,.25);
+}
+.btn.success:hover { box-shadow: 0 6px 20px rgba(18,212,160,.4); }
+.btn.danger {
+  background: var(--rose-bg); border-color: rgba(255,61,92,.3); color: var(--rose);
+}
+.btn.danger:hover { background: var(--rose); border-color: var(--rose); color: #fff; }
+.btn.warn { border-color: rgba(255,179,64,.35); color: var(--amber); }
+.btn.warn:hover { background: var(--amber-bg); }
+.btn:disabled { opacity: .4; pointer-events: none; }
+
+/* ════════════════════════════════════════════════
+   TABLE
+════════════════════════════════════════════════ */
+.table-wrap { overflow-x: auto; }
+.dt thead th {
+  background: var(--bg2);
+  font-size: 9.5px; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--muted); text-align: left;
+  padding: 10px 16px; border-bottom: 1px solid var(--bd);
+  white-space: nowrap; font-weight: 700;
+}
+.dt tbody td { padding: 12px 16px; border-bottom: 1px solid var(--bd); font-size: 13px; vertical-align: middle; }
+.dt tbody tr { transition: background var(--trans); }
+.dt tbody tr:hover { background: var(--bg2); }
+.dt tbody tr:last-child td { border-bottom: none; }
+
+.mono  { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+.fw    { font-weight: 700; }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 99px;
+  font-size: 10.5px; font-weight: 700; letter-spacing: .03em;
+}
+.badge::before { content: ''; width: 4.5px; height: 4.5px; border-radius: 99px; background: currentColor; }
+.badge.paid,   .badge.active-s, .badge.yes { background: var(--teal-bg); color: var(--teal); }
+.badge.due,    .badge.warn                 { background: var(--amber-bg); color: var(--amber); }
+.badge.hosteler,.badge.partial             { background: var(--blue-bg); color: var(--blue); }
+.badge.dayscholar                          { background: var(--blue2-bg); color: var(--blue2); }
+.badge.inactive,.badge.graduated           { background: var(--rose-bg); color: var(--rose); }
+
+.amount-pos { color: var(--teal); font-weight: 700; font-family: var(--mono); font-size: 12.5px; }
+.amount-neg { color: var(--rose); font-weight: 700; font-family: var(--mono); font-size: 12.5px; }
+.amount-n   { font-weight: 700; font-family: var(--mono); font-size: 12.5px; }
+.pill-actions { display: flex; gap: 4px; align-items: center; }
+
+/* ════════════════════════════════════════════════
+   PAGINATION
+════════════════════════════════════════════════ */
+.pg-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 18px; border-top: 1px solid var(--bd); flex-wrap: wrap; gap: 8px;
+}
+.pg-info { font-size: 12px; color: var(--muted); }
+.pg-nums { display: flex; gap: 4px; }
+.pg-n {
+  width: 30px; height: 30px; border-radius: var(--r-xs);
+  border: 1px solid var(--bd); background: var(--bg2);
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: background var(--trans), border-color var(--trans);
+}
+.pg-n.cur { background: linear-gradient(135deg, var(--blue), var(--blue2)); border-color: transparent; color: #fff; }
+.pg-n:hover:not(.cur) { background: var(--bg3); }
+
+/* ════════════════════════════════════════════════
+   FEE STRUCTURE
+════════════════════════════════════════════════ */
+.fs-grid { display: grid; grid-template-columns: 240px 1fr; gap: 14px; align-items: start; }
+.year-panel { background: var(--bg1); border: 1px solid var(--bd); border-radius: var(--r); overflow: hidden; }
+.year-panel-head {
+  padding: 13px 15px; border-bottom: 1px solid var(--bd);
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .16em; color: var(--muted);
+}
+.year-list { padding: 8px; }
+.year-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 11px; border-radius: var(--r-s);
+  cursor: pointer; transition: background var(--trans);
+  margin-bottom: 2px; border: 1px solid transparent;
+}
+.year-item:hover { background: var(--bg2); }
+.year-item.sel  { background: var(--blue-bg); border-color: rgba(79,141,255,.2); }
+.year-item-name { font-size: 13px; font-weight: 700; }
+.year-item-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.sem-panel { display: flex; flex-direction: column; gap: 12px; }
+.sem-card  { background: var(--bg1); border: 1px solid var(--bd); border-radius: var(--r); overflow: hidden; }
+.sem-hd {
+  padding: 12px 17px; background: var(--bg2);
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+.sem-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+.fee-list  { padding: 6px 17px; }
+.fee-row   { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--bd); gap: 12px; }
+.fee-row:last-child { border-bottom: none; }
+.fee-dot { width: 7px; height: 7px; border-radius: 99px; flex: 0 0 auto; }
+
+/* ════════════════════════════════════════════════
+   PROFILE MODAL
+════════════════════════════════════════════════ */
+.profile-modal { width: min(700px, calc(100vw - 28px)); }
+.profile-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.info-pair { display: flex; flex-direction: column; gap: 3px; padding: 11px 0; border-bottom: 1px solid var(--bd); }
+.info-pair:last-child { border-bottom: none; }
+.info-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 700; }
+.info-val   { font-size: 13.5px; font-weight: 500; }
+.fee-table-sm { border-radius: var(--r-s); overflow: hidden; border: 1px solid var(--bd); }
+.fee-table-sm th { background: var(--bg2); font-size: 9.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); padding: 8px 12px; text-align: left; font-weight: 700; border-bottom: 1px solid var(--bd); }
+.fee-table-sm td { padding: 9px 12px; border-bottom: 1px solid var(--bd); font-size: 12.5px; }
+.fee-table-sm tr:last-child td { border-bottom: none; }
+.fee-table-sm tr:hover td { background: var(--bg2); }
+
+/* ════════════════════════════════════════════════
+   PAYMENT FORM
+════════════════════════════════════════════════ */
+.pay-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .09em; }
+.field input, .field select, .field textarea { width: 100%; }
+
+/* ════════════════════════════════════════════════
+   PROMOTE
+════════════════════════════════════════════════ */
+.promote-preview { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+.promo-cell {
+  background: var(--bg2); border-radius: var(--r-s); padding: 20px;
+  text-align: center; border: 1px solid var(--bd);
+  transition: border-color var(--trans), transform var(--trans);
+}
+.promo-cell:hover { border-color: var(--bd2); transform: translateY(-2px); }
+.promo-val   { font-size: 30px; font-weight: 800; color: var(--blue); letter-spacing: -.8px; }
+.promo-label { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+/* ════════════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════════════ */
+.settings-sections { display: flex; flex-direction: column; gap: 20px; }
+.settings-card { background: var(--bg1); border: 1px solid var(--bd); border-radius: var(--r); padding: 22px; }
+.settings-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.settings-title { font-size: 14px; font-weight: 700; }
+.settings-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* ════════════════════════════════════════════════
+   ROLE BADGES & MISC
+════════════════════════════════════════════════ */
+.role-badge { font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 700; }
+.role-badge.super_admin { background: var(--blue2-bg); color: var(--blue2); }
+.role-badge.admin       { background: var(--blue-bg);  color: var(--blue); }
+.role-badge.accountant  { background: var(--teal-bg);  color: var(--teal); }
+.role-badge.viewer      { background: var(--bg3);       color: var(--muted); }
+
+.empty-state { padding: 48px; text-align: center; color: var(--muted); font-size: 13px; }
+.empty-state .ico { font-size: 38px; display: block; margin-bottom: 12px; opacity: .35; }
+
+.divider-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .16em;
+  color: var(--faint); padding: 14px 0 6px; font-weight: 700;
+}
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ════════════════════════════════════════════════
+   ANALYTICS
+════════════════════════════════════════════════ */
+.bar-chart-wrap { position: relative; height: 140px; display: flex; align-items: flex-end; gap: 6px; padding-bottom: 24px; }
+.bc-bar-group   { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bc-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--blue-bg); border: 1px solid rgba(79,141,255,.2); transition: height .8s cubic-bezier(.16,1,.3,1); min-height: 2px; }
+.bc-bar.filled { background: var(--blue); }
+.bc-label { font-size: 9.5px; color: var(--muted); text-align: center; position: absolute; bottom: 0; }
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  :root { --sw: 264px; }
+  .sidebar { position: fixed; inset: 0 auto 0 0; transform: translateX(-100%); z-index: 60; }
+  .sidebar.open { transform: none; }
+  .shell { grid-template-columns: 1fr; }
+  .header { grid-column: 1; }
+  .main   { grid-column: 1; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .mid-row, .fs-grid { grid-template-columns: 1fr; }
+  .pay-form, .profile-grid, .settings-grid, .promote-preview { grid-template-columns: 1fr; }
+  .search-wrap { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+<div class="toast-shelf" id="toastShelf"></div>
+
+<!-- ════════════════ MODALS ════════════════ -->
+
+<!-- Add Student -->
+<div class="modal" id="modalStudent">
+  <div class="modal-head">
+    <span class="modal-title">Add Student</span>
+    <button class="close-btn" data-close="modalStudent"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div class="pay-form">
+      <div class="field"><label>Roll Number</label><input class="inp" id="sRoll" placeholder="25429-cs-001"></div>
+      <div class="field"><label>Full Name</label><input class="inp" id="sName" placeholder="Student Name"></div>
+      <div class="field"><label>Branch</label><input class="inp" id="sBranch" placeholder="Computer Science"></div>
+      <div class="field"><label>Year Level</label>
+        <select class="sel" id="sYear"><option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option></select>
+      </div>
+      <div class="field"><label>Student Type</label>
+        <select class="sel" id="sType" onchange="toggleTransport(this.value)">
+          <option value="hosteler">Hosteler</option><option value="day_scholar">Day Scholar</option>
+        </select>
+      </div>
+      <div class="field" id="transportField" style="display:none"><label>Transport</label>
+        <select class="sel" id="sTransport"><option value="college_bus">College Bus</option><option value="own_transport">Own Transport</option></select>
+      </div>
+      <div class="field"><label>Email (optional)</label><input class="inp" id="sEmail" type="email" placeholder="student@email.com"></div>
+      <div class="field"><label>Parent Phone</label><input class="inp" id="sPhone" placeholder="+91 9999999999"></div>
+      <div class="field"><label>Batch</label>
+        <select class="sel" id="sBatch"><option value="">— Select batch —</option></select>
+      </div>
+    </div>
+    <div id="stuErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalStudent">Cancel</button>
+      <button class="btn primary" onclick="submitAddStudent()"><span class="ico out" style="font-size:15px">person_add</span> Add Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Add Students -->
+<div class="modal" id="modalBulk">
+  <div class="modal-head">
+    <span class="modal-title">Bulk Add Students</span>
+    <button class="close-btn" data-close="modalBulk"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div class="pay-form">
+      <div class="field"><label>College Code</label><input class="inp" id="bColCode" placeholder="25429"></div>
+      <div class="field"><label>Branch Code</label><input class="inp" id="bBranchCode" placeholder="cs"></div>
+      <div class="field full"><label>Branch Name</label><input class="inp" id="bBranch" placeholder="Computer Science"></div>
+      <div class="field"><label>Year Level</label>
+        <select class="sel" id="bYear"><option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option></select>
+      </div>
+      <div class="field"><label>Student Type</label>
+        <select class="sel" id="bType" onchange="toggleBulkTransport(this.value)">
+          <option value="hosteler">Hosteler</option><option value="day_scholar">Day Scholar</option>
+        </select>
+      </div>
+      <div class="field" id="bulkTransportField" style="display:none"><label>Transport</label>
+        <select class="sel" id="bTransport"><option value="college_bus">College Bus</option><option value="own_transport">Own Transport</option></select>
+      </div>
+      <div class="field"><label>Batch</label>
+        <select class="sel" id="bBatch"><option value="">— Select batch —</option></select>
+      </div>
+     <div class="field full">
+  <label>Roll Numbers</label>
+  <input class="inp" id="bRolls" placeholder="e.g. 1-60, 80, 90, 95-100" style="width:100%">
+  <div id="bRollsPreview" style="font-size:11px;color:var(--muted);margin-top:5px"></div>
+</div>
+    </div>
+    <div id="bulkErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalBulk">Cancel</button>
+      <button class="btn primary" onclick="submitBulk()"><span class="ico out" style="font-size:15px">group_add</span> Bulk Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Record Payment -->
+<div class="modal" id="modalPay">
+  <div class="modal-head">
+    <span class="modal-title">Record Payment</span>
+    <button class="close-btn" data-close="modalPay"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input class="inp" id="payRollSearch" placeholder="Enter roll number…" style="flex:1">
+      <button class="btn primary" onclick="searchStudentForPay()"><span class="ico out" style="font-size:15px">search</span> Find</button>
+    </div>
+    <div id="payStudentInfo" style="display:none;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r-s);padding:12px 14px;margin-bottom:16px;font-size:13px">Loading...</div>
+    <div class="pay-form" id="payFormFields" style="display:none">
+      <input type="hidden" id="payStudentId">
+      <div class="field full"><label>Fee</label>
+        <select class="sel" id="payFeeSelect" style="width:100%" onchange="updatePayDue()"><option value="">— select fee —</option></select>
+      </div>
+      <div class="field"><label>Amount (₹)</label><input class="inp" id="payAmount" type="number" min="1" placeholder="0.00"></div>
+      <div class="field"><label>Payment Mode</label>
+        <select class="sel" id="payMode">
+          <option value="cash">Cash</option><option value="upi">UPI</option>
+          <option value="dd">DD</option><option value="cheque">Cheque</option><option value="online">Online</option>
+        </select>
+      </div>
+      <div class="field"><label>Date</label><input class="inp" id="payDate" type="date"></div>
+      <div class="field"><label>Receipt No.</label><input class="inp" id="payReceipt" placeholder="REC-2025-001"></div>
+      <div class="field full"><label>Notes (optional)</label><textarea class="txta" id="payNotes" style="min-height:60px"></textarea></div>
+    </div>
+    <div id="payDueInfo" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+    <div id="payErrMsg" style="color:var(--rose);font-size:12px;margin-top:8px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalPay">Cancel</button>
+      <button class="btn success" id="submitPayBtn" onclick="submitPayment()" style="display:none"><span class="ico out" style="font-size:15px">add_card</span> Record Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student Profile -->
+<div class="modal profile-modal" id="modalProfile">
+  <div class="modal-head">
+    <span class="modal-title" id="profileTitle">Student Profile</span>
+    <button class="close-btn" data-close="modalProfile"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body" id="profileBody">Loading...</div>
+</div>
+
+<!-- Add Waiver -->
+<div class="modal" id="modalWaiver">
+  <div class="modal-head">
+    <span class="modal-title">Add Waiver / Concession</span>
+    <button class="close-btn" data-close="modalWaiver"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div class="pay-form">
+      <div class="field full"><label>Student Roll No.</label>
+        <div style="display:flex;gap:8px">
+          <input class="inp" id="wRoll" placeholder="25429-cs-001" style="flex:1">
+          <button class="btn" onclick="searchStudentForWaiver()"><span class="ico out" style="font-size:14px">search</span></button>
+        </div>
+      </div>
+      <div class="field full"><label>Fee</label><select class="sel" id="wFeeSelect" style="width:100%"><option value="">— search student first —</option></select></div>
+      <input type="hidden" id="wStudentId">
+      <div class="field"><label>Waiver Type</label>
+        <select class="sel" id="wType"><option value="merit">Merit</option><option value="economical">Economical</option><option value="staff_ward">Staff Ward</option><option value="other">Other</option></select>
+      </div>
+      <div class="field"><label>Amount (₹)</label><input class="inp" id="wAmount" type="number" min="1" placeholder="0.00"></div>
+      <div class="field full"><label>Reason</label><input class="inp" id="wReason" placeholder="Brief reason"></div>
+    </div>
+    <div id="waiverErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalWaiver">Cancel</button>
+      <button class="btn warn" onclick="submitWaiver()"><span class="ico out" style="font-size:15px">shield</span> Apply Waiver</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Scholarship -->
+<div class="modal" id="modalScholarship">
+  <div class="modal-head">
+    <span class="modal-title">Add Scholarship</span>
+    <button class="close-btn" data-close="modalScholarship"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div class="pay-form">
+      <div class="field full"><label>Student Roll No.</label>
+        <div style="display:flex;gap:8px">
+          <input class="inp" id="schRoll" placeholder="25429-cs-001" style="flex:1">
+          <button class="btn" onclick="searchStudentForScholarship()"><span class="ico out" style="font-size:14px">search</span></button>
+        </div>
+      </div>
+      <div class="field full"><label>Fee</label><select class="sel" id="schFeeSelect" style="width:100%"><option value="">— search student first —</option></select></div>
+      <input type="hidden" id="schStudentId">
+      <div class="field"><label>Scheme Name</label>
+        <select class="sel" id="schScheme"><option value="APCFSS">APCFSS</option><option value="TSCFSS">TSCFSS</option><option value="NMS">NMS</option><option value="other">Other</option></select>
+      </div>
+      <div class="field"><label>Amount (₹)</label><input class="inp" id="schAmount" type="number" min="1" placeholder="0.00"></div>
+    </div>
+    <div id="schErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalScholarship">Cancel</button>
+      <button class="btn success" onclick="submitScholarship()"><span class="ico out" style="font-size:15px">school</span> Apply Scholarship</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Batch -->
+<div class="modal" id="modalBatch">
+  <div class="modal-head">
+    <span class="modal-title">Create Batch</span>
+    <button class="close-btn" data-close="modalBatch"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div class="pay-form">
+      <div class="field"><label>Batch Year</label><input class="inp" id="batYear" type="number" placeholder="2025" min="2000" max="2099"></div>
+      <div class="field"><label>College Code</label><input class="inp" id="batCode" placeholder="25429"></div>
+    </div>
+    <div style="margin-top:14px;padding:12px 14px;background:var(--blue-bg);border-radius:var(--r-s);border:1px solid rgba(79,141,255,.15);font-size:12.5px;color:var(--muted)">
+      <span class="ico out" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">info</span>
+      Auto-creates 3 academic years and 6 semesters for a Diploma programme.
+    </div>
+    <div id="batchErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalBatch">Cancel</button>
+      <button class="btn primary" onclick="submitBatch()"><span class="ico out" style="font-size:15px">add</span> Create Batch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Fee -->
+<div class="modal" id="modalAddFee">
+  <div class="modal-head">
+    <span class="modal-title">Add Fee to Semester</span>
+    <button class="close-btn" data-close="modalAddFee"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="addFeeSemId">
+    <div id="feeRows">
+      <div class="pay-form fee-entry-row" style="margin-bottom:10px">
+        <div class="field"><label>Fee Name</label><input class="inp fee-name-inp" placeholder="College Fee"></div>
+        <div class="field"><label>Category</label>
+          <select class="sel fee-cat-sel">
+            <option value="college_fee">College Fee</option>
+            <option value="building_fee">Building Fee</option>
+            <option value="hostel_fee">Hostel Fee</option>
+            <option value="bus_fee">Bus Fee</option>
+            <option value="exam_fee">Exam Fee</option>
+            <option value="library_fee">Library Fee</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Amount (₹)</label><input class="inp fee-amt-inp" type="number" min="1" placeholder="0.00"></div>
+      </div>
+    </div>
+    <button class="btn" onclick="addFeeRow()" style="margin-top:4px"><span class="ico out" style="font-size:15px">add</span> Add Row</button>
+    <div id="addFeeErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalAddFee">Cancel</button>
+      <button class="btn primary" onclick="submitFees()"><span class="ico out" style="font-size:15px">save</span> Save Fees</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Admin -->
+<div class="modal" id="modalAdmin">
+  <div class="modal-head">
+    <span class="modal-title">Add Admin User</span>
+    <button class="close-btn" data-close="modalAdmin"><span class="ico out" style="font-size:16px">close</span></button>
+  </div>
+  <div class="modal-body">
+    <div class="pay-form">
+      <div class="field"><label>Username</label><input class="inp" id="adUser" placeholder="username"></div>
+      <div class="field"><label>Role</label>
+        <select class="sel" id="adRole"><option value="viewer">Viewer</option><option value="accountant">Accountant</option><option value="admin">Admin</option></select>
+      </div>
+      <div class="field"><label>Email</label><input class="inp" id="adEmail" type="email" placeholder="admin@college.edu"></div>
+      <div class="field"><label>Password</label><input class="inp" id="adPass" type="password" placeholder="Min 8 chars"></div>
+    </div>
+    <div id="adminErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalAdmin">Cancel</button>
+      <button class="btn primary" onclick="submitAdmin()"><span class="ico out" style="font-size:15px">admin_panel_settings</span> Create Admin</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════ SHELL ════════════════ -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="s-brand">
+      <div class="logo-mark"><span class="ico">account_balance</span></div>
+      <div class="brand-text">
+        <div class="brand-name">Fee<em>Flow</em></div>
+        <div class="brand-tag">Admin Console</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="navEl">
+      <div class="s-sect">Overview</div>
+      <div class="nav-item active" data-p="dashboard">
+        <span class="ico">dashboard</span><span class="nav-label">Dashboard</span>
+      </div>
+
+      <div class="s-sect">Students</div>
+      <div class="nav-item" data-p="students"><span class="ico">group</span><span class="nav-label">Students</span></div>
+      <div class="nav-item" data-p="batches"><span class="ico">layers</span><span class="nav-label">Batches</span></div>
+
+      <div class="s-sect">Finance</div>
+      <div class="nav-item" data-p="payments"><span class="ico">payments</span><span class="nav-label">Payments</span></div>
+      <div class="nav-item" data-p="fees"><span class="ico">account_tree</span><span class="nav-label">Fee Structure</span></div>
+      <div class="nav-item" data-p="waivers"><span class="ico">shield</span><span class="nav-label">Waivers &amp; Scholarships</span></div>
+      <div class="nav-item" data-p="defaulters"><span class="ico">warning</span><span class="nav-label">Defaulters</span></div>
+
+      <div class="s-sect">Management</div>
+      <div class="nav-item" data-p="analytics"><span class="ico">analytics</span><span class="nav-label">Analytics</span></div>
+      <div class="nav-item" data-p="promote"><span class="ico">upgrade</span><span class="nav-label">Promote Year</span></div>
+      <div class="nav-item" data-p="admins"><span class="ico">admin_panel_settings</span><span class="nav-label">Admin Users</span></div>
+      <div class="nav-item" data-p="audit"><span class="ico">history</span><span class="nav-label">Audit Log</span></div>
+      <div class="nav-item" data-p="settings"><span class="ico">tune</span><span class="nav-label">Settings</span></div>
+    </nav>
+
+    <div class="s-footer">
+      <button class="s-logout" onclick="location.href='/logout'">
+        <span class="ico">logout</span><span class="s-logout-text">Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="h-left">
+      <button class="icon-btn" id="menuBtn"><span class="ico out">menu</span></button>
+      <button class="icon-btn" id="collapseBtn"><span class="ico out">left_panel_close</span></button>
+      <div class="page-title" id="pageTitle">Dashboard</div>
+    </div>
+    <div class="h-right">
+      <label class="search-wrap">
+        <span class="ico out" style="font-size:16px;color:var(--muted)">search</span>
+        <input id="gSearch" placeholder="Roll no, name, receipt…" type="text">
+      </label>
+      <button class="icon-btn" id="themeBtn" title="Toggle theme">
+        <span class="ico out" id="themeIco">dark_mode</span>
+      </button>
+      <div class="user-chip">
+        <div class="user-av" id="userAv">{{ (admin_name or 'A')[0]|upper if admin_name else 'A' }}</div>
+        <div class="user-nm" id="userName">{{ admin_name or 'Admin' }}</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="mainArea">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-eyebrow">Total Students <div class="stat-icon blue"><span class="ico">group</span></div></div>
+          <div class="stat-val" id="sStudents"><span class="sk" style="width:80px">&nbsp;</span></div>
+          <div class="stat-sub" id="sStudentsSub"><span class="sk" style="width:120px">&nbsp;</span></div>
+          <div class="stat-accent blue"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-eyebrow">Total Collected <div class="stat-icon teal"><span class="ico">payments</span></div></div>
+          <div class="stat-val" id="sCollected"><span class="sk" style="width:100px">&nbsp;</span></div>
+          <div class="stat-sub" id="sCollectedSub"><span class="sk" style="width:120px">&nbsp;</span></div>
+          <div class="stat-accent teal"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-eyebrow">Outstanding <div class="stat-icon rose"><span class="ico">pending_actions</span></div></div>
+          <div class="stat-val" id="sPending"><span class="sk" style="width:100px">&nbsp;</span></div>
+          <div class="stat-sub" id="sPendingSub"><span class="sk" style="width:100px">&nbsp;</span></div>
+          <div class="stat-accent rose"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-eyebrow">Today's Receipts <div class="stat-icon amber"><span class="ico">receipt</span></div></div>
+          <div class="stat-val" id="sReceipts"><span class="sk" style="width:60px">&nbsp;</span></div>
+          <div class="stat-sub" id="sReceiptsSub"><span class="sk" style="width:120px">&nbsp;</span></div>
+          <div class="stat-accent amber"></div>
+        </div>
+      </div>
+
+      <div class="mid-row">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Collection by Batch</div></div>
+          <div class="card-body">
+            <div class="branch-list" id="branchRows">
+              <div class="sk" style="height:18px;width:85%;margin-bottom:14px">&nbsp;</div>
+              <div class="sk" style="height:18px;width:65%;margin-bottom:14px">&nbsp;</div>
+              <div class="sk" style="height:18px;width:75%">&nbsp;</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Quick Actions</div></div>
+          <div class="card-body">
+            <div class="qa-list">
+              <button class="qa-btn" id="qa-pay">
+                <div class="qa-icon" style="background:var(--teal-bg);color:var(--teal)"><span class="ico">add_card</span></div>
+                <div class="qa-text"><strong>Record Payment</strong><small>Enter receipt &amp; amount</small></div>
+              </button>
+              <button class="qa-btn" id="qa-student">
+                <div class="qa-icon" style="background:var(--blue-bg);color:var(--blue)"><span class="ico">person_add</span></div>
+                <div class="qa-text"><strong>Add Student</strong><small>Single or bulk registration</small></div>
+              </button>
+              <button class="qa-btn" id="qa-waiver">
+                <div class="qa-icon" style="background:var(--amber-bg);color:var(--amber)"><span class="ico">shield</span></div>
+                <div class="qa-text"><strong>Add Waiver</strong><small>Concession or scholarship</small></div>
+              </button>
+              <button class="qa-btn" id="qa-report">
+                <div class="qa-icon" style="background:var(--blue2-bg);color:var(--blue2)"><span class="ico">download</span></div>
+                <div class="qa-text"><strong>Export Report</strong><small>Download Excel data</small></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STUDENTS ── -->
+    <div class="page" id="page-students">
+      <div class="ph">
+        <div class="ph-info"><h2>Students</h2><p>Diploma 3-year programme — manage enrolments</p></div>
+        <div class="ph-actions">
+          <button class="btn" id="openBulkStudent"><span class="ico out" style="font-size:15px">group_add</span> Bulk Add</button>
+          <button class="btn primary" id="openAddStudent"><span class="ico out" style="font-size:15px">person_add</span> Add Student</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <div class="t-actions">
+            <input class="inp" id="stuSearch" placeholder="Name or roll no…" style="width:200px">
+            <select class="sel" id="stuStatus"><option value="all">All Status</option><option value="active">Active</option><option value="graduated">Graduated</option></select>
+            <select class="sel" id="stuTypeFilter"><option value="all">All Types</option><option value="hosteler">Hosteler</option><option value="day_scholar">Day Scholar</option></select>
+          </div>
+          <button class="btn" onclick="window.open('/api/admin/export_excel','_blank')"><span class="ico out" style="font-size:15px">download</span> Export</button>
+        </div>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>Roll No.</th><th>Name</th><th>Branch</th><th>Year</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="stuBody"><tr><td colspan="7"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pg-bar">
+          <div class="pg-info" id="stuInfo"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn" id="stuPrev"><span class="ico out" style="font-size:16px">chevron_left</span></button>
+            <div class="pg-nums" id="stuNums"></div>
+            <button class="btn" id="stuNext"><span class="ico out" style="font-size:16px">chevron_right</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BATCHES ── -->
+    <div class="page" id="page-batches">
+      <div class="ph">
+        <div class="ph-info"><h2>Batches</h2><p>Diploma cohorts — each batch auto-generates 3 years &amp; 6 semesters</p></div>
+        <div class="ph-actions">
+          <button class="btn primary" onclick="openModal('modalBatch')"><span class="ico out" style="font-size:15px">add</span> New Batch</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>Batch Year</th><th>Code</th><th>College Code</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="batchBody"><tr><td colspan="5"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAYMENTS ── -->
+    <div class="page" id="page-payments">
+      <div class="ph">
+        <div class="ph-info"><h2>Payments</h2><p>All recorded fee receipts</p></div>
+        <div class="ph-actions">
+          <button class="btn success" onclick="openModal('modalPay')"><span class="ico out" style="font-size:15px">add_card</span> Record Payment</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <div class="t-actions">
+            <input class="inp" id="pSearch" placeholder="Roll, name, receipt…" style="width:200px">
+            <select class="sel" id="pStatus"><option value="all">All</option><option value="Paid">Paid</option></select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>Receipt</th><th>Roll No.</th><th>Name</th><th>Fee</th><th>Sem</th><th>Mode</th><th>Amount</th><th>Date</th><th>By</th><th>PDF</th></tr></thead>
+            <tbody id="payBody"><tr><td colspan="10"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pg-bar">
+          <div class="pg-info" id="pInfo"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn" id="pPrev"><span class="ico out" style="font-size:16px">chevron_left</span></button>
+            <div class="pg-nums" id="pNums"></div>
+            <button class="btn" id="pNext"><span class="ico out" style="font-size:16px">chevron_right</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FEE STRUCTURE ── -->
+    <div class="page" id="page-fees">
+      <div class="ph">
+        <div class="ph-info"><h2>Fee Structure</h2><p>Manage semester-wise fee rules for each batch</p></div>
+        <div class="ph-actions">
+          <button class="btn primary" onclick="openModal('modalBatch')"><span class="ico out" style="font-size:15px">add</span> New Batch</button>
+        </div>
+      </div>
+      <div class="fs-grid">
+        <div class="year-panel">
+          <div class="year-panel-head">Academic Years</div>
+          <div class="year-list" id="yearList"><div class="sk" style="height:50px;margin:8px;border-radius:8px">&nbsp;</div></div>
+        </div>
+        <div class="sem-panel" id="semPanel">
+          <div class="empty-state"><span class="ico">account_tree</span>Select an academic year to view semesters</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WAIVERS & SCHOLARSHIPS ── -->
+    <div class="page" id="page-waivers">
+      <div class="ph">
+        <div class="ph-info"><h2>Waivers &amp; Scholarships</h2><p>Fee concessions and government scholarship tracking</p></div>
+        <div class="ph-actions">
+          <button class="btn warn" onclick="openModal('modalWaiver')"><span class="ico out" style="font-size:15px">shield</span> Add Waiver</button>
+          <button class="btn success" onclick="openModal('modalScholarship')"><span class="ico out" style="font-size:15px">school</span> Add Scholarship</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>Roll</th><th>Name</th><th>Fee</th><th>Type</th><th>Scheme / Reason</th><th>Amount</th><th>Granted By</th></tr></thead>
+            <tbody id="waiverBody"><tr><td colspan="7"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DEFAULTERS ── -->
+    <div class="page" id="page-defaulters">
+      <div class="ph">
+        <div class="ph-info"><h2>Defaulters</h2><p>Students with overdue fees</p></div>
+        <div class="ph-actions">
+          <button class="btn danger" id="sendRemindersBtn"><span class="ico out" style="font-size:15px">notifications</span> Send Reminders</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <div class="t-actions">
+            <input class="inp" id="defSearch" placeholder="Search…" style="width:200px">
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;color:var(--muted)">
+            <input type="checkbox" id="defCheckAll"> Select all
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th></th><th>Roll</th><th>Name</th><th>Branch</th><th>Sem</th><th>Due Date</th><th>Pending</th><th>Overdue</th></tr></thead>
+            <tbody id="defBody"><tr><td colspan="8"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="page" id="page-analytics">
+      <div class="ph">
+        <div class="ph-info"><h2>Batch Analytics</h2><p>Collection performance across all batches</p></div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>Batch</th><th>Code</th><th>Status</th><th>Students</th><th>Total Due</th><th>Collected</th><th>Pending</th><th>%</th></tr></thead>
+            <tbody id="analyticsBody"><tr><td colspan="8"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROMOTE ── -->
+    <div class="page" id="page-promote">
+      <div class="ph">
+        <div class="ph-info"><h2>Promote Students</h2><p>Advance all eligible students to the next academic year</p></div>
+      </div>
+      <div class="card" style="max-width:620px">
+        <div class="card-head"><div class="card-title">Promotion Preview</div></div>
+        <div class="card-body">
+          <div class="promote-preview" id="promotePreviewBody">
+            <div class="sk" style="height:80px;border-radius:10px">&nbsp;</div>
+            <div class="sk" style="height:80px;border-radius:10px">&nbsp;</div>
+            <div class="sk" style="height:80px;border-radius:10px">&nbsp;</div>
+          </div>
+          <div class="divider-label">Target Academic Year</div>
+          <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+            <select class="sel" id="promoteYearSel" style="flex:1"><option value="">— Select year —</option></select>
+            <button class="btn primary" id="submitPromote"><span class="ico out" style="font-size:15px">upgrade</span> Promote All</button>
+          </div>
+          <div id="promoteMsg" style="color:var(--rose);font-size:12px;margin-top:10px"></div>
+          <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--bd)">
+            <div class="divider-label">Undo Last Promotion</div>
+            <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+              <select class="sel" id="undoYearSel" style="flex:1"><option value="">— Select year to undo —</option></select>
+              <button class="btn danger" id="undoPromote"><span class="ico out" style="font-size:15px">undo</span> Undo</button>
+            </div>
+            <div id="undoMsg" style="color:var(--rose);font-size:12px;margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADMIN USERS ── -->
+    <div class="page" id="page-admins">
+      <div class="ph">
+        <div class="ph-info"><h2>Admin Users</h2><p>Manage staff access and roles</p></div>
+        <div class="ph-actions">
+          <button class="btn primary" onclick="openModal('modalAdmin')"><span class="ico out" style="font-size:15px">person_add</span> Add Admin</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="adminsBody"><tr><td colspan="5"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AUDIT LOG ── -->
+    <div class="page" id="page-audit">
+      <div class="ph">
+        <div class="ph-info"><h2>Audit Log</h2><p>All admin actions are recorded here</p></div>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <div class="t-actions">
+            <input class="inp" id="auditSearch" placeholder="Filter by action or user…" style="width:240px">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="dt">
+            <thead><tr><th>Time</th><th>Admin</th><th>Action</th><th>Target</th><th>IP</th></tr></thead>
+            <tbody id="auditBody"><tr><td colspan="5"><div class="sk" style="height:40px;margin:8px">&nbsp;</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="pg-bar">
+          <div class="pg-info" id="auditInfo"></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn" id="auditPrev"><span class="ico out" style="font-size:16px">chevron_left</span></button>
+            <div class="pg-nums" id="auditNums"></div>
+            <button class="btn" id="auditNext"><span class="ico out" style="font-size:16px">chevron_right</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="page" id="page-settings">
+      <div class="ph">
+        <div class="ph-info"><h2>Settings</h2><p>College branding and system configuration</p></div>
+      </div>
+      <div class="settings-sections">
+        <div class="settings-card">
+          <div class="settings-head">
+            <span class="settings-title">College Branding</span>
+            <button class="btn primary" onclick="saveCollegeSettings()"><span class="ico out" style="font-size:15px">save</span> Save</button>
+          </div>
+          <div class="settings-grid">
+            <div class="field"><label>College Name</label><input class="inp" id="cgName" style="width:100%"></div>
+            <div class="field"><label>Principal Name</label><input class="inp" id="cgPrincipal" style="width:100%"></div>
+            <div class="field"><label>Phone</label><input class="inp" id="cgPhone" style="width:100%"></div>
+            <div class="field"><label>Email</label><input class="inp" id="cgEmail" type="email" style="width:100%"></div>
+            <div class="field" style="grid-column:1/-1"><label>Address</label><textarea class="txta" id="cgAddress" style="width:100%;min-height:70px"></textarea></div>
+            <div class="field"><label>Website</label><input class="inp" id="cgWebsite" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <div class="settings-head"><span class="settings-title">Change Password</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:500px">
+            <div class="field"><label>New Password</label><input class="inp" id="newPass" type="password" style="width:100%"></div>
+            <div class="field"><label>Confirm Password</label><input class="inp" id="confirmPass" type="password" style="width:100%"></div>
+          </div>
+          <div style="margin-top:14px">
+            <button class="btn primary" onclick="changePassword()"><span class="ico out" style="font-size:15px">lock_reset</span> Update Password</button>
+          </div>
+          <div id="pwMsg" style="font-size:12px;margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /shell -->
+
+<!-- Edit Student Modal -->
+<div class="modal" id="modalEditStudent">
+  <div class="modal-head">
+    <span class="modal-title">Edit Student</span>
+    <button class="close-btn" data-close="modalEditStudent">
+      <span class="ico out" style="font-size:16px">close</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <input type="hidden" id="editStudentId">
+    <div class="pay-form">
+      <div class="field"><label>Roll Number</label>
+        <input class="inp" id="editRoll" disabled style="opacity:.5;cursor:not-allowed">
+      </div>
+      <div class="field"><label>Full Name</label>
+        <input class="inp" id="editName" placeholder="Student Name">
+      </div>
+      <div class="field"><label>Branch</label>
+        <input class="inp" id="editBranch" placeholder="Computer Science">
+      </div>
+      <div class="field"><label>Year Level</label>
+        <select class="sel" id="editYear">
+          <option value="1">Year 1</option>
+          <option value="2">Year 2</option>
+          <option value="3">Year 3</option>
+        </select>
+      </div>
+      <div class="field"><label>Student Type</label>
+        <select class="sel" id="editType" onchange="toggleEditTransport(this.value)">
+          <option value="hosteler">Hosteler</option>
+          <option value="day_scholar">Day Scholar</option>
+        </select>
+      </div>
+      <div class="field" id="editTransportField" style="display:none">
+        <label>Transport</label>
+        <select class="sel" id="editTransport">
+          <option value="college_bus">College Bus</option>
+          <option value="own_transport">Own Transport</option>
+        </select>
+      </div>
+      <div class="field"><label>Email</label>
+        <input class="inp" id="editEmail" type="email" placeholder="student@email.com">
+      </div>
+      <div class="field"><label>Parent Phone</label>
+        <input class="inp" id="editPhone" placeholder="+91 9999999999">
+      </div>
+      <div class="field"><label>Status</label>
+        <select class="sel" id="editStatus">
+          <option value="active">Active</option>
+          <option value="graduated">Graduated</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div id="editErrMsg" style="color:var(--rose);font-size:12px;margin-top:12px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn" data-close="modalEditStudent">Cancel</button>
+      <button class="btn primary" onclick="submitEditStudent()">
+        <span class="ico out" style="font-size:15px">save</span> Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+// ═══════════════════════════════════════════════
+//  GLOBALS
+// ═══════════════════════════════════════════════
+const ROLE = '{{ role }}';
+let allStudents=[], allPayments=[], allDefaulters=[], allAdmins=[], allAudit=[], allWaivers=[];
+let years=[], batches=[];
+let selectedYearId=null;
+const PER_PAGE=25;
+const stuState={page:1}, pState={page:1}, auditState={page:1};
+
+// ═══════════════════════════════════════════════
+//  UTILITY
+// ═══════════════════════════════════════════════
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const INR = v => '₹' + Number(v||0).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2});
+const fmt = d => d ? new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+
+async function api(url, opts={}) {
+  try {
+    const r = await fetch(url, opts);
+    let data; try { data=await r.json(); } catch { data={}; }
+    return { ok:r.ok, status:r.status, data };
+  } catch(e) { return { ok:false, status:0, data:{} }; }
+}
+
+function toast(title, desc='', type='ok') {
+  const s=document.getElementById('toastShelf');
+  const t=document.createElement('div');
+  const ico=type==='ok'?'check_circle':type==='err'?'error':'info';
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span class="ico t-ico">${ico}</span><div><div class="t-title">${esc(title)}</div><div class="t-desc">${esc(desc)}</div></div>`;
+  s.appendChild(t);
+  setTimeout(()=>t.remove(),4500);
+}
+
+function openModal(id){
+  document.getElementById(id).classList.add('on');
+  document.getElementById('overlay').classList.add('on');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('on');
+  if(!document.querySelector('.modal.on')) document.getElementById('overlay').classList.remove('on');
+}
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
+document.getElementById('overlay').addEventListener('click',()=>{
+  document.querySelectorAll('.modal.on').forEach(m=>m.classList.remove('on'));
+  document.getElementById('overlay').classList.remove('on');
+});
+
+function renderPagination(arr,page,perPage,numsId,infoId,onPage,prevId,nextId){
+  const total=arr.length, pages=Math.max(1,Math.ceil(total/perPage));
+  const p=Math.min(page,pages);
+  document.getElementById(infoId).textContent=total?`${(p-1)*perPage+1}–${Math.min(p*perPage,total)} of ${total}`:'No records';
+  const numsEl=document.getElementById(numsId);
+  numsEl.innerHTML='';
+  for(let i=1;i<=pages&&i<=7;i++){
+    const btn=document.createElement('div');
+    btn.className='pg-n'+(i===p?' cur':'');
+    btn.textContent=i;
+    btn.addEventListener('click',()=>onPage(i));
+    numsEl.appendChild(btn);
+  }
+  document.getElementById(prevId).disabled=p<=1;
+  document.getElementById(nextId).disabled=p>=pages;
+  document.getElementById(prevId).onclick=()=>{if(p>1)onPage(p-1);};
+  document.getElementById(nextId).onclick=()=>{if(p<pages)onPage(p+1);};
+}
+
+// ═══════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════
+const PAGE_TITLES={
+  dashboard:'Dashboard',students:'Students',batches:'Batches',payments:'Payments',
+  fees:'Fee Structure',waivers:'Waivers & Scholarships',defaulters:'Defaulters',
+  analytics:'Batch Analytics',promote:'Promote Year',admins:'Admin Users',
+  audit:'Audit Log',settings:'Settings'
+};
+
+function goTo(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const pg=document.getElementById('page-'+p);
+  if(pg) pg.classList.add('active');
+  document.querySelector(`.nav-item[data-p="${p}"]`)?.classList.add('active');
+  document.getElementById('pageTitle').textContent=PAGE_TITLES[p]||p;
+  document.getElementById('mainArea').scrollTo(0,0);
+  if(p==='dashboard'){loadStats();loadBatchAnalyticsForDash();}
+  else if(p==='students') loadStudents();
+  else if(p==='batches') loadBatches();
+  else if(p==='payments') loadPayments();
+  else if(p==='fees') loadYears();
+  else if(p==='waivers') loadWaivers();
+  else if(p==='defaulters') loadDefaulters();
+  else if(p==='analytics') loadBatchAnalytics();
+  else if(p==='promote') loadPromote();
+  else if(p==='admins') loadAdmins();
+  else if(p==='audit') loadAudit();
+  else if(p==='settings') loadCollegeSettings();
+}
+
+document.querySelectorAll('.nav-item[data-p]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    goTo(el.dataset.p);
+    if(window.innerWidth<768) document.getElementById('sidebar').classList.remove('open');
+  });
+});
+
+// ═══════════════════════════════════════════════
+//  SIDEBAR & THEME
+// ═══════════════════════════════════════════════
+const sidebar=document.getElementById('sidebar');
+document.getElementById('menuBtn').addEventListener('click',()=>sidebar.classList.toggle('open'));
+document.getElementById('collapseBtn').addEventListener('click',()=>sidebar.classList.toggle('slim'));
+
+const html=document.documentElement;
+const themeBtn=document.getElementById('themeBtn');
+const themeIco=document.getElementById('themeIco');
+const savedTheme=localStorage.getItem('ff_theme')||'dark';
+html.setAttribute('data-theme',savedTheme);
+themeIco.textContent=savedTheme==='dark'?'light_mode':'dark_mode';
+themeBtn.addEventListener('click',()=>{
+  const next=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  localStorage.setItem('ff_theme',next);
+  themeIco.textContent=next==='dark'?'light_mode':'dark_mode';
+});
+
+// Global search
+document.getElementById('gSearch').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const q=e.target.value.trim(); if(!q) return;
+    goTo('students');
+    setTimeout(()=>{document.getElementById('stuSearch').value=q;renderStudents();},100);
+  }
+});
+
+// Quick actions
+document.getElementById('qa-pay').addEventListener('click',()=>openModal('modalPay'));
+document.getElementById('qa-student').addEventListener('click',()=>openModal('modalStudent'));
+document.getElementById('qa-waiver').addEventListener('click',()=>{goTo('waivers');});
+document.getElementById('qa-report').addEventListener('click',()=>window.open('/api/admin/export_excel','_blank'));
+document.getElementById('openAddStudent').addEventListener('click',async()=>{await populateBatchSelects();openModal('modalStudent');});
+document.getElementById('openBulkStudent').addEventListener('click',async()=>{await populateBatchSelects();openModal('modalBulk');});
+
+// ═══════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════
+async function loadStats(){
+  const{ok,data}=await api('/api/admin/dashboard'); if(!ok) return;
+  document.getElementById('sStudents').textContent=data.total_students||0;
+  document.getElementById('sStudentsSub').textContent=`${data.hostelers||0} hostelers · ${data.day_scholars||0} day scholars`;
+  document.getElementById('sCollected').textContent=INR(data.collected);
+  document.getElementById('sCollectedSub').textContent=`Today: ${INR(data.collected_today)} · ${data.receipts_today||0} receipts`;
+  document.getElementById('sPending').textContent=INR(data.pending);
+  document.getElementById('sPendingSub').textContent=`${data.defaulters||0} defaulters`;
+  document.getElementById('sReceipts').textContent=data.receipts_today||0;
+  document.getElementById('sReceiptsSub').textContent=`${INR(data.collected_today)} collected today`;
+}
+
+async function loadBatchAnalyticsForDash(){
+  const{ok,data}=await api('/api/admin/batch_analytics');
+  if(!ok||!data.length) return;
+  document.getElementById('branchRows').innerHTML=data.slice(0,5).map(b=>{
+    const pct=Math.min(100,b.pct||0);
+    const color=pct>=75?'var(--teal)':pct>=40?'var(--blue)':'var(--rose)';
+    return `<div style="margin-bottom:14px">
+      <div class="br-head"><span class="br-name">Batch ${esc(b.batch_year)}</span><span class="br-pct">${pct}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="br-meta"><span>${esc(b.students)} students</span><span class="amount-pos">${INR(b.collected)}</span><span class="amount-neg">${INR(b.pending)} due</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  STUDENTS
+// ═══════════════════════════════════════════════
+async function loadStudents(){
+  const{ok,data}=await api('/api/admin/students');
+  if(!ok){toast('Error','Could not load students.','err');return;}
+  allStudents=data||[]; stuState.page=1; renderStudents();
+}
+
+function renderStudents(){
+  const q=(document.getElementById('stuSearch').value||'').toLowerCase();
+  const st=document.getElementById('stuStatus').value;
+  const tp=document.getElementById('stuTypeFilter').value;
+  const filtered=allStudents.filter(s=>{
+    if(st!=='all'&&s.status!==st) return false;
+    if(tp!=='all'&&s.student_type!==tp&&s.student_type!==tp.replace('_','')) return false;
+    return !q||[s.roll_no,s.name,s.branch].some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  const p=stuState.page, from=(p-1)*PER_PAGE, slice=filtered.slice(from,from+PER_PAGE);
+  document.getElementById('stuBody').innerHTML=slice.length?slice.map(s=>`
+    <tr>
+      <td class="mono">${esc(s.roll_no)}</td>
+      <td class="fw">${esc(s.name)}</td>
+      <td style="color:var(--muted)">${esc(s.branch)}</td>
+      <td>Year ${esc(s.year_level)}</td>
+      <td><span class="badge ${s.student_type==='hosteler'?'hosteler':'dayscholar'}">${s.student_type==='hosteler'?'Hosteler':'Day Scholar'}</span></td>
+      <td><span class="badge ${s.status==='active'?'active-s':s.status==='graduated'?'graduated':'inactive'}">${esc(s.status)}</span></td>
+      <td>
+        <div class="pill-actions">
+          <button class="btn" style="font-size:11px;min-height:28px;padding:0 8px" onclick="openProfile(${s.id})"><span class="ico out" style="font-size:13px">person</span> View</button>
+          <button class="btn" style="font-size:11px;min-height:28px;padding:0 8px" onclick="openEditStudent(${s.id})"><span class="ico out" style="font-size:13px">edit</span></button>
+          <button class="btn" style="font-size:11px;min-height:28px;padding:0 8px;color:var(--teal)" onclick="window.open('/api/admin/no_dues_pdf/${s.id}','_blank')"><span class="ico out" style="font-size:13px">verified</span></button>
+        </div>
+      </td>
+    </tr>`).join(''):`<tr><td colspan="7"><div class="empty-state"><span class="ico">group</span>No students match your filters.</div></td></tr>`;
+  renderPagination(filtered,p,PER_PAGE,'stuNums','stuInfo',pg=>{stuState.page=pg;renderStudents();},'stuPrev','stuNext');
+}
+
+['stuSearch','stuStatus','stuTypeFilter'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{stuState.page=1;renderStudents();}));
+
+// ═══════════════════════════════════════════════
+//  ADD / EDIT STUDENT
+// ═══════════════════════════════════════════════
+function toggleTransport(v){document.getElementById('transportField').style.display=v==='day_scholar'?'flex':'none';}
+function toggleBulkTransport(v){document.getElementById('bulkTransportField').style.display=v==='day_scholar'?'flex':'none';}
+
+async function populateBatchSelects(){
+  if(!batches.length){const{ok,data}=await api('/api/batches');if(ok) batches=data||[];}
+  ['sBatch','bBatch'].forEach(id=>{
+    const sel=document.getElementById(id); if(!sel) return;
+    sel.innerHTML='<option value="">— Select batch —</option>'+batches.map(b=>`<option value="${b.id}">${esc(b.batch_year)} (${esc(b.college_code)})</option>`).join('');
+  });
+}
+
+async function submitAddStudent(){
+  const roll_no=document.getElementById('sRoll').value.trim(),name=document.getElementById('sName').value.trim(),
+        branch=document.getElementById('sBranch').value.trim(),year_level=parseInt(document.getElementById('sYear').value),
+        student_type=document.getElementById('sType').value,transport_type=document.getElementById('sTransport').value,
+        email=document.getElementById('sEmail').value.trim(),parent_phone=document.getElementById('sPhone').value.trim(),
+        batch_id=document.getElementById('sBatch').value;
+  document.getElementById('stuErrMsg').textContent='';
+  if(!roll_no||!name||!branch){document.getElementById('stuErrMsg').textContent='Roll no, name and branch are required.';return;}
+  const body={roll_no,name,branch,year_level,student_type,email:email||null,parent_phone:parent_phone||null,batch_id:batch_id||null};
+  if(student_type==='day_scholar') body.transport_type=transport_type;
+  const{ok,data}=await api('/api/admin/add_student',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(ok&&data.success){toast('Student added',`${name} enrolled.`);closeModal('modalStudent');loadStudents();}
+  else{document.getElementById('stuErrMsg').textContent=data.error||'Failed to add student.';}
+}
+
+// Live preview as user types
+document.getElementById('bRolls').addEventListener('input', function(){
+  const preview = document.getElementById('bRollsPreview');
+  const result  = parseRollInput(this.value);
+  if(result.error){
+    preview.style.color = 'var(--rose)';
+    preview.textContent = result.error;
+  } else {
+    preview.style.color = 'var(--teal)';
+    preview.textContent = `${result.numbers.length} students: ${
+      result.numbers.slice(0,10).join(', ')}${result.numbers.length > 10 ? ` ... +${result.numbers.length-10} more` : ''}`;
+  }
+});
+
+function parseRollInput(raw){
+  if(!raw || !raw.trim()) return { error: 'Enter at least one roll number or range.' };
+  const parts   = raw.split(',').map(p => p.trim()).filter(Boolean);
+  const numbers = [];
+  for(const part of parts){
+    if(part.includes('-')){
+      const [a, b] = part.split('-').map(x => parseInt(x.trim()));
+      if(isNaN(a) || isNaN(b))   return { error: `Invalid range: "${part}"` };
+      if(a < 1 || b < 1)         return { error: `Numbers must be positive: "${part}"` };
+      if(a > b)                   return { error: `Start must be less than end: "${part}"` };
+      if(b - a > 499)             return { error: `Range too large (max 500): "${part}"` };
+      for(let i = a; i <= b; i++) numbers.push(i);
+    } else {
+      const n = parseInt(part);
+      if(isNaN(n) || n < 1)      return { error: `Invalid number: "${part}"` };
+      numbers.push(n);
+    }
+  }
+  if(numbers.length === 0)       return { error: 'No valid numbers found.' };
+  if(numbers.length > 500)       return { error: `Too many students (${numbers.length}). Max 500.` };
+  // Remove duplicates and sort
+  const unique = [...new Set(numbers)].sort((a,b) => a-b);
+  return { numbers: unique };
+}
+
+async function submitBulk(){
+  document.getElementById('bulkErrMsg').textContent = '';
+
+  const college_code   = document.getElementById('bColCode').value.trim();
+  const branch_code    = document.getElementById('bBranchCode').value.trim().toLowerCase();
+  const branch         = document.getElementById('bBranch').value.trim();
+  const year_level     = parseInt(document.getElementById('bYear').value);
+  const student_type   = document.getElementById('bType').value;
+  const transport_type = document.getElementById('bTransport').value;
+  const batch_id       = document.getElementById('bBatch').value || null;
+  const rollsRaw       = document.getElementById('bRolls').value;
+
+  if(!college_code || !branch_code || !branch){
+    document.getElementById('bulkErrMsg').textContent = 'College code, branch code and branch name are required.';
+    return;
+  }
+
+  const parsed = parseRollInput(rollsRaw);
+  if(parsed.error){
+    document.getElementById('bulkErrMsg').textContent = parsed.error;
+    return;
+  }
+
+  // Build roll_numbers string for backend e.g. "1,2,3,4-60"
+  // Send as individual numbers (backend handles the list)
+  const roll_numbers = parsed.numbers.join(',');
+
+  const { ok, data } = await api('/api/admin/bulk_add_students', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      college_code,
+      branch_code,
+      branch,
+      year_level,
+      student_type,
+      transport_type: student_type === 'day_scholar' ? transport_type : null,
+      batch_id,
+      roll_numbers   // send as comma-separated numbers
+    })
+  });
+
+  if(ok && data.success){
+    toast('Bulk add done', `${data.created} created, ${data.skipped} skipped.`);
+    closeModal('modalBulk');
+    loadStudents();
+    // Reset form
+    document.getElementById('bRolls').value = '';
+    document.getElementById('bRollsPreview').textContent = '';
+  } else {
+    document.getElementById('bulkErrMsg').textContent = data.error || 'Failed.';
+  }
+}
+// ═══════════════════════════════════════════════
+//  STUDENT PROFILE
+// ═══════════════════════════════════════════════
+async function openProfile(id){
+  openModal('modalProfile');
+  document.getElementById('profileBody').innerHTML='<div style="padding:32px;text-align:center;color:var(--muted)"><span class="ico spin" style="font-size:28px">autorenew</span></div>';
+  const{ok,data}=await api(`/api/admin/student_profile/${id}`);
+  if(!ok){document.getElementById('profileBody').innerHTML='<div class="empty-state"><span class="ico">error</span>Could not load profile.</div>';return;}
+  const s=data.student||{},fees=data.fees||[],payments=data.payments||[];
+  document.getElementById('profileTitle').textContent=s.name||'Student Profile';
+  const totalDue=fees.reduce((a,f)=>a+f.due,0);
+  const totalPaid=fees.reduce((a,f)=>a+f.paid,0);
+  document.getElementById('profileBody').innerHTML=`
+    <div class="profile-grid" style="margin-bottom:20px">
+      <div>
+        <div class="info-pair"><div class="info-label">Roll No.</div><div class="info-val mono">${esc(s.roll_no)}</div></div>
+        <div class="info-pair"><div class="info-label">Branch</div><div class="info-val">${esc(s.branch)}</div></div>
+        <div class="info-pair"><div class="info-label">Year</div><div class="info-val">Year ${s.year_level}</div></div>
+        <div class="info-pair"><div class="info-label">Type</div><div class="info-val"><span class="badge ${s.student_type==='hosteler'?'hosteler':'dayscholar'}">${s.student_type}</span></div></div>
+      </div>
+      <div>
+        <div class="info-pair"><div class="info-label">Email</div><div class="info-val">${esc(s.email||'—')}</div></div>
+        <div class="info-pair"><div class="info-label">Parent Phone</div><div class="info-val">${esc(s.parent_phone||'—')}</div></div>
+        <div class="info-pair"><div class="info-label">Total Paid</div><div class="info-val amount-pos">${INR(totalPaid)}</div></div>
+        <div class="info-pair"><div class="info-label">Total Due</div><div class="info-val amount-neg">${INR(totalDue)}</div></div>
+      </div>
+    </div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);margin-bottom:10px">Fee Summary</div>
+    <div class="fee-table-sm" style="margin-bottom:20px">
+      <table><thead><tr><th>Fee</th><th>Semester</th><th>Total</th><th>Paid</th><th>Due</th><th>Action</th></tr></thead>
+      <tbody>${fees.map(f=>`<tr>
+        <td>${esc(f.fee_name)}</td><td>Sem ${f.semester_no}</td>
+        <td class="amount-n">${INR(f.total)}</td>
+        <td class="amount-pos">${INR(f.paid)}</td>
+        <td class="${f.due>0?'amount-neg':'amount-pos'}">${INR(f.due)}</td>
+        <td><button class="btn" style="font-size:11px;min-height:26px;padding:0 8px" onclick="openPayFromProfile(${s.id},'${esc(s.roll_no)}',${f.fee_structure_id},${f.due})">Pay</button></td>
+      </tr>`).join('')}</tbody></table>
+    </div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);margin-bottom:10px">Payment History</div>
+    <div class="fee-table-sm">
+      <table><thead><tr><th>Receipt</th><th>Fee</th><th>Amount</th><th>Mode</th><th>Date</th><th>PDF</th></tr></thead>
+      <tbody>${payments.length?payments.map(p=>`<tr>
+        <td class="mono">${esc(p.receipt_no)}</td><td>${esc(p.fee_name)}</td>
+        <td class="amount-pos">${INR(p.amount)}</td>
+        <td style="text-transform:uppercase;font-size:11px">${esc(p.payment_mode)}</td>
+        <td style="font-size:11.5px;color:var(--muted)">${fmt(p.date)}</td>
+        <td><button class="btn" style="font-size:11px;min-height:26px;padding:0 8px" onclick="window.open('/api/admin/receipt_pdf/${p.id}','_blank')"><span class="ico out" style="font-size:13px">download</span></button></td>
+      </tr>`).join(''):'<tr><td colspan="6" class="empty-state" style="padding:16px">No payments yet.</td></tr>'}</tbody></table>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
+      <button class="btn success" onclick="openPayFromProfile(${s.id},'${esc(s.roll_no)}',null,0)"><span class="ico out" style="font-size:15px">add_card</span> Record Payment</button>
+      <button class="btn" onclick="window.open('/api/admin/no_dues_pdf/${s.id}','_blank')"><span class="ico out" style="font-size:15px">verified</span> No Dues PDF</button>
+      <button class="btn" onclick="window.open('/api/admin/tc_pdf/${s.id}','_blank')"><span class="ico out" style="font-size:15px">description</span> TC</button>
+    </div>`;
+}
+
+function openPayFromProfile(studentId,rollNo,feeId,due){
+  closeModal('modalProfile');
+  openModal('modalPay');
+  document.getElementById('payRollSearch').value=rollNo;
+  searchStudentForPay().then(()=>{
+    if(feeId){document.getElementById('payFeeSelect').value=feeId;updatePayDue();}
+  });
+}
+
+function toggleEditTransport(v){
+  document.getElementById('editTransportField').style.display = 
+    v === 'day_scholar' ? 'flex' : 'none';
+}
+
+function openEditStudent(id){
+  const s = allStudents.find(x => x.id === id);
+  if(!s) return;
+
+  // Populate fields
+  document.getElementById('editStudentId').value  = s.id;
+  document.getElementById('editRoll').value        = s.roll_no;
+  document.getElementById('editName').value        = s.name;
+  document.getElementById('editBranch').value      = s.branch;
+  document.getElementById('editYear').value        = s.year_level;
+  document.getElementById('editType').value        = s.student_type;
+  document.getElementById('editEmail').value       = s.email || '';
+  document.getElementById('editPhone').value       = s.parent_phone || '';
+  document.getElementById('editStatus').value      = s.status || 'active';
+  document.getElementById('editErrMsg').textContent = '';
+
+  // Transport
+  toggleEditTransport(s.student_type);
+  if(s.transport_type){
+    document.getElementById('editTransport').value = s.transport_type;
+  }
+
+  openModal('modalEditStudent');
+}
+
+async function submitEditStudent(){
+  const id             = document.getElementById('editStudentId').value;
+  const name           = document.getElementById('editName').value.trim();
+  const branch         = document.getElementById('editBranch').value.trim();
+  const year_level     = parseInt(document.getElementById('editYear').value);
+  const student_type   = document.getElementById('editType').value;
+  const transport_type = document.getElementById('editTransport').value;
+  const email          = document.getElementById('editEmail').value.trim();
+  const parent_phone   = document.getElementById('editPhone').value.trim();
+  const status         = document.getElementById('editStatus').value;
+  const errEl          = document.getElementById('editErrMsg');
+  errEl.textContent    = '';
+
+  if(!name || !branch){
+    errEl.textContent = 'Name and branch are required.';
+    return;
+  }
+
+  const{ok, data} = await api(`/api/admin/edit_student/${id}`, {
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      name, branch, year_level, student_type,
+      transport_type: student_type === 'day_scholar' ? transport_type : null,
+      email: email || null,
+      parent_phone: parent_phone || null,
+      status
+    })
+  });
+
+  if(ok && data.success){
+    toast('Student updated', `${name} saved successfully.`);
+    closeModal('modalEditStudent');
+    loadStudents();
+  } else {
+    errEl.textContent = data.error || 'Failed to update student.';
+  }
+}
+// ═══════════════════════════════════════════════
+//  PAYMENTS
+// ═══════════════════════════════════════════════
+async function searchStudentForPay(){
+  const roll=document.getElementById('payRollSearch').value.trim();
+  if(!roll){toast('Required','Enter a roll number.','err');return;}
+  const{ok,data}=await api(`/api/admin/student_by_roll?roll=${encodeURIComponent(roll)}`);
+  const infoEl=document.getElementById('payStudentInfo');
+  const formEl=document.getElementById('payFormFields');
+  const submitBtn=document.getElementById('submitPayBtn');
+  if(!ok){infoEl.style.display='block';infoEl.innerHTML=`<span style="color:var(--rose)">${esc(data.error||'Student not found.')}</span>`;formEl.style.display='none';submitBtn.style.display='none';return;}
+  const s=data.student, fees=data.fees||[];
+  infoEl.style.display='block';
+  infoEl.innerHTML=`<div style="display:flex;gap:16px;flex-wrap:wrap">
+    <div><div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Name</div><div style="font-weight:700">${esc(s.name)}</div></div>
+    <div><div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Branch</div><div>${esc(s.branch)}</div></div>
+    <div><div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Year</div><div>Year ${s.year_level}</div></div>
+    <div><div style="font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Type</div><div>${esc(s.student_type)}</div></div>
+  </div>`;
+  document.getElementById('payStudentId').value=s.id;
+  document.getElementById('payFeeSelect').innerHTML='<option value="">— select fee —</option>'+
+    fees.map(f=>`<option value="${f.fee_structure_id}" data-due="${f.due}">${esc(f.fee_name)} · Sem ${f.semester_no} — Due: ${INR(f.due)}</option>`).join('');
+  document.getElementById('payDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('payReceipt').value='REC-'+Date.now();
+  formEl.style.display='grid'; submitBtn.style.display='inline-flex';
+  document.getElementById('payErrMsg').textContent='';
+}
+
+function updatePayDue(){
+  const sel=document.getElementById('payFeeSelect');
+  const opt=sel.options[sel.selectedIndex];
+  const due=opt?parseFloat(opt.dataset.due||0):0;
+  document.getElementById('payAmount').value=due>0?due.toFixed(2):'';
+  document.getElementById('payDueInfo').textContent=due>0?`Due amount: ${INR(due)}`:'';
+}
+
+async function submitPayment(){
+  const student_id=document.getElementById('payStudentId').value;
+  const fee_structure_id=document.getElementById('payFeeSelect').value;
+  const amount=parseFloat(document.getElementById('payAmount').value);
+  const payment_mode=document.getElementById('payMode').value;
+  const date=document.getElementById('payDate').value;
+  const receipt_no=document.getElementById('payReceipt').value.trim();
+  const notes=document.getElementById('payNotes').value.trim();
+  const errEl=document.getElementById('payErrMsg'); errEl.textContent='';
+  if(!student_id||!fee_structure_id||!amount||!date||!receipt_no){errEl.textContent='All fields are required.';return;}
+  const sel=document.getElementById('payFeeSelect');
+  const fee_type=sel.options[sel.selectedIndex]?.text||'Fee';
+  const{ok,data}=await api('/api/admin/record_payment',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({student_id:parseInt(student_id),fee_structure_id:parseInt(fee_structure_id),amount,payment_mode,date,receipt_no,fee_type,notes})
+  });
+  if(ok&&data.success){toast('Payment recorded',`Receipt: ${receipt_no}`,'ok');closeModal('modalPay');loadPayments();}
+  else{errEl.textContent=data.error||'Failed.';}
+}
+
+async function loadPayments(){
+  const{ok,data}=await api('/api/admin/payments'); if(!ok) return;
+  allPayments=data||[]; pState.page=1; renderPayments();
+}
+
+function renderPayments(){
+  const q=(document.getElementById('pSearch').value||'').toLowerCase();
+  const st=document.getElementById('pStatus').value;
+  const filtered=allPayments.filter(p=>{
+    if(st!=='all'&&p.status!==st) return false;
+    return !q||[p.receipt_no,p.roll_no,p.name,p.fee_name].some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  const p2=pState.page, from=(p2-1)*PER_PAGE, slice=filtered.slice(from,from+PER_PAGE);
+  document.getElementById('payBody').innerHTML=slice.length?slice.map(p=>`
+    <tr>
+      <td class="mono">${esc(p.receipt_no)}</td>
+      <td class="mono">${esc(p.roll_no)}</td>
+      <td class="fw">${esc(p.name)}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(p.fee_name)}</td>
+      <td style="font-size:12px">Sem ${p.semester_no}</td>
+      <td style="text-transform:uppercase;font-size:11px;color:var(--muted)">${esc(p.payment_mode)}</td>
+      <td class="amount-pos">${INR(p.amount)}</td>
+      <td style="font-size:11.5px;color:var(--muted)">${fmt(p.date)}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(p.paid_by||'—')}</td>
+      <td><button class="btn" style="font-size:11px;min-height:26px;padding:0 8px" onclick="window.open('/api/admin/receipt_pdf/${p.id}','_blank')"><span class="ico out" style="font-size:13px">download</span></button></td>
+    </tr>`).join(''):`<tr><td colspan="10"><div class="empty-state"><span class="ico">payments</span>No payments found.</div></td></tr>`;
+  renderPagination(filtered,p2,PER_PAGE,'pNums','pInfo',pg=>{pState.page=pg;renderPayments();},'pPrev','pNext');
+}
+
+['pSearch','pStatus'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{pState.page=1;renderPayments();}));
+
+// ═══════════════════════════════════════════════
+//  BATCHES
+// ═══════════════════════════════════════════════
+async function loadBatches(){
+  const{ok,data}=await api('/api/batches'); if(!ok) return;
+  batches=data||[];
+  document.getElementById('batchBody').innerHTML=batches.length?batches.map(b=>`
+    <tr>
+      <td class="fw">${esc(b.batch_year)}</td>
+      <td class="mono">${esc(b.batch_code||'—')}</td>
+      <td class="mono">${esc(b.college_code)}</td>
+      <td><span class="badge ${b.status==='active'?'active-s':'graduated'}">${esc(b.status)}</span></td>
+      <td><button class="btn danger" style="font-size:11px;min-height:28px;padding:0 8px" onclick="deleteBatch(${b.id})"><span class="ico out" style="font-size:13px">delete</span></button></td>
+    </tr>`).join(''):`<tr><td colspan="5"><div class="empty-state"><span class="ico">layers</span>No batches yet.</div></td></tr>`;
+}
+
+async function submitBatch(){
+  const batch_year=parseInt(document.getElementById('batYear').value);
+  const college_code=document.getElementById('batCode').value.trim();
+  document.getElementById('batchErrMsg').textContent='';
+  if(!batch_year||!college_code){document.getElementById('batchErrMsg').textContent='Both fields required.';return;}
+  const{ok,data}=await api('/api/batches',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({batch_year,college_code})});
+  if(ok&&data.success){toast('Batch created');closeModal('modalBatch');loadBatches();}
+  else{document.getElementById('batchErrMsg').textContent=data.error||'Failed.';}
+}
+
+async function deleteBatch(id){
+  if(!confirm('Delete this batch? This cannot be undone.')) return;
+  const{ok}=await api(`/api/batches/${id}`,{method:'DELETE'});
+  if(ok){toast('Batch deleted');loadBatches();}else toast('Error','Could not delete.','err');
+}
+
+// ═══════════════════════════════════════════════
+//  FEE STRUCTURE
+// ═══════════════════════════════════════════════
+async function loadYears(){
+  const{ok,data}=await api('/api/academic_years'); if(!ok) return;
+  years=data||[];
+  document.getElementById('yearList').innerHTML=years.length?years.map(y=>`
+    <div class="year-item ${y.id===selectedYearId?'sel':''}" onclick="selectYear(${y.id})">
+      <div><div class="year-item-name">${esc(y.year_name)}</div><div class="year-item-sub">${esc(y.batch_year||'')}</div></div>
+    </div>`).join(''):`<div style="padding:12px;font-size:12px;color:var(--muted)">No academic years found.</div>`;
+  // Populate year selects in promote page
+  const yOpts=years.map(y=>`<option value="${y.id}">${esc(y.year_name)}</option>`).join('');
+  document.getElementById('promoteYearSel').innerHTML='<option value="">— Select year —</option>'+yOpts;
+  document.getElementById('undoYearSel').innerHTML='<option value="">— Select year to undo —</option>'+yOpts;
+}
+
+async function selectYear(id){
+  selectedYearId=id;
+  document.querySelectorAll('.year-item').forEach(el=>el.classList.remove('sel'));
+  document.querySelector(`.year-item[onclick="selectYear(${id})"]`)?.classList.add('sel');
+  const{ok,data}=await api(`/api/academic_years/${id}/semesters`);
+  const panel=document.getElementById('semPanel');
+  if(!ok||!data.length){panel.innerHTML='<div class="empty-state"><span class="ico">account_tree</span>No semesters.</div>';return;}
+  panel.innerHTML=data.map(s=>`
+    <div class="sem-card">
+      <div class="sem-hd">
+        <span class="sem-title">Semester ${s.semester_no} <span style="color:var(--muted);font-weight:400;font-size:11px">${s.due_date?'· Due: '+fmt(s.due_date):''}</span></span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" style="font-size:11px;min-height:28px;padding:0 8px" onclick="openAddFeeModal(${s.id})"><span class="ico out" style="font-size:13px">add</span> Add Fee</button>
+          <button class="btn" style="font-size:11px;min-height:28px;padding:0 8px" onclick="assignFees(${s.id})"><span class="ico out" style="font-size:13px">assignment</span> Assign</button>
+        </div>
+      </div>
+      <div class="fee-list" id="fees-sem-${s.id}"><div class="sk" style="height:20px;width:80%;margin:8px 0">&nbsp;</div></div>
+    </div>`).join('');
+  data.forEach(s=>loadSemFees(s.id));
+}
+
+async function loadSemFees(semId){
+  const{ok,data}=await api(`/api/semesters/${semId}/fees`);
+  const el=document.getElementById(`fees-sem-${semId}`); if(!el) return;
+  if(!ok||!data.length){el.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">No fees defined.</div>';return;}
+  const CATS={college_fee:'var(--blue)',building_fee:'var(--blue2)',hostel_fee:'var(--teal)',bus_fee:'var(--amber)',exam_fee:'var(--rose)',library_fee:'var(--muted)',other:'var(--faint)'};
+  el.innerHTML=data.map(f=>`
+    <div class="fee-row">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="fee-dot" style="background:${CATS[f.fee_category]||'var(--muted)'}"></div>
+        <div><div style="font-size:13px;font-weight:600">${esc(f.fee_name)}</div><div style="font-size:11px;color:var(--muted)">${esc(f.fee_category).replace('_',' ')}</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="amount-n">${INR(f.amount)}</span>
+        <button class="btn danger" style="font-size:11px;min-height:26px;padding:0 8px" onclick="deleteFee(${f.id},${semId})"><span class="ico out" style="font-size:13px">delete</span></button>
+      </div>
+    </div>`).join('');
+}
+
+function openAddFeeModal(semId){
+  document.getElementById('addFeeSemId').value=semId;
+  document.getElementById('addFeeErrMsg').textContent='';
+  document.getElementById('feeRows').innerHTML=`
+    <div class="pay-form fee-entry-row" style="margin-bottom:10px">
+      <div class="field"><label>Fee Name</label><input class="inp fee-name-inp" placeholder="College Fee"></div>
+      <div class="field"><label>Category</label><select class="sel fee-cat-sel"><option value="college_fee">College Fee</option><option value="building_fee">Building Fee</option><option value="hostel_fee">Hostel Fee</option><option value="bus_fee">Bus Fee</option><option value="exam_fee">Exam Fee</option><option value="library_fee">Library Fee</option><option value="other">Other</option></select></div>
+      <div class="field"><label>Amount (₹)</label><input class="inp fee-amt-inp" type="number" min="1" placeholder="0.00"></div>
+    </div>`;
+  openModal('modalAddFee');
+}
+
+function addFeeRow(){
+  const row=document.createElement('div');
+  row.className='pay-form fee-entry-row'; row.style.marginBottom='10px';
+  row.innerHTML=`<div class="field"><label>Fee Name</label><input class="inp fee-name-inp" placeholder="Fee Name"></div><div class="field"><label>Category</label><select class="sel fee-cat-sel"><option value="college_fee">College Fee</option><option value="building_fee">Building Fee</option><option value="hostel_fee">Hostel Fee</option><option value="bus_fee">Bus Fee</option><option value="exam_fee">Exam Fee</option><option value="library_fee">Library Fee</option><option value="other">Other</option></select></div><div class="field"><label>Amount (₹)</label><input class="inp fee-amt-inp" type="number" min="1"></div>`;
+  document.getElementById('feeRows').appendChild(row);
+}
+
+async function submitFees(){
+  const semId=document.getElementById('addFeeSemId').value;
+  const rows=document.querySelectorAll('.fee-entry-row'); const fees=[];
+  rows.forEach(r=>{
+    const name=r.querySelector('.fee-name-inp').value.trim();
+    const cat=r.querySelector('.fee-cat-sel').value;
+    const amt=parseFloat(r.querySelector('.fee-amt-inp').value);
+    if(name&&amt>0) fees.push({fee_name:name,fee_category:cat,amount:amt});
+  });
+  if(!fees.length){document.getElementById('addFeeErrMsg').textContent='Add at least one fee.';return;}
+  const{ok,data}=await api(`/api/semesters/${semId}/fees/bulk`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fees})});
+  if(ok&&data.success){toast('Fees added',`${data.created} fee(s) created.`);closeModal('modalAddFee');loadSemFees(semId);}
+  else{document.getElementById('addFeeErrMsg').textContent=data.error||'Failed.';}
+}
+
+async function deleteFee(feeId,semId){
+  if(!confirm('Delete this fee?')) return;
+  const{ok}=await api(`/api/fees/${feeId}`,{method:'DELETE'});
+  if(ok){toast('Fee deleted');loadSemFees(semId);}else toast('Error','Could not delete fee.','err');
+}
+
+async function assignFees(semId){
+  const{ok,data}=await api(`/api/semesters/${semId}/assign_fees`,{method:'POST'});
+  if(ok&&data.success) toast('Fees assigned',`${data.assigned} assigned, ${data.skipped} skipped.`);
+  else toast('Error',data.error||'Failed.','err');
+}
+
+// ═══════════════════════════════════════════════
+//  WAIVERS & SCHOLARSHIPS
+// ═══════════════════════════════════════════════
+async function loadWaivers(){
+  const{ok,data}=await api('/api/admin/waivers_list');
+  if(!ok){document.getElementById('waiverBody').innerHTML='<tr><td colspan="7"><div class="empty-state"><span class="ico">shield</span>No waivers yet.</div></td></tr>';return;}
+  allWaivers=data||[];
+  document.getElementById('waiverBody').innerHTML=allWaivers.length?allWaivers.map(w=>`
+    <tr>
+      <td class="mono">${esc(w.roll_no)}</td><td class="fw">${esc(w.name)}</td>
+      <td>${esc(w.fee_name)}</td>
+      <td><span class="badge hosteler">${esc(w.waiver_type||w.scheme_name)}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(w.reason||w.scheme_name||'—')}</td>
+      <td class="amount-neg">${INR(w.waiver_amount||w.amount)}</td>
+      <td style="font-size:12px;color:var(--muted)">${esc(w.granted_by||w.verified_by||'—')}</td>
+    </tr>`).join(''):'<tr><td colspan="7"><div class="empty-state"><span class="ico">shield</span>No waivers or scholarships yet.</div></td></tr>';
+}
+
+async function searchStudentForWaiver(){
+  const roll=document.getElementById('wRoll').value.trim(); if(!roll) return;
+  const{ok,data}=await api(`/api/admin/student_by_roll?roll=${encodeURIComponent(roll)}`);
+  if(!ok){toast('Not found',data.error||'Student not found.','err');return;}
+  const s=data.student; const fees=data.fees||[];
+  document.getElementById('wStudentId').value=s.id;
+  document.getElementById('wFeeSelect').innerHTML=fees.map(f=>`<option value="${f.fee_structure_id}">${esc(f.fee_name)} · Sem ${f.semester_no}</option>`).join('');
+}
+
+async function submitWaiver(){
+  const student_id=document.getElementById('wStudentId').value,fee_structure_id=document.getElementById('wFeeSelect').value,
+        waiver_type=document.getElementById('wType').value,waiver_amount=parseFloat(document.getElementById('wAmount').value),
+        reason=document.getElementById('wReason').value.trim();
+  document.getElementById('waiverErrMsg').textContent='';
+  if(!student_id||!fee_structure_id||!waiver_amount){document.getElementById('waiverErrMsg').textContent='All fields required.';return;}
+  const{ok,data}=await api('/api/admin/add_waiver',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({student_id:parseInt(student_id),fee_structure_id:parseInt(fee_structure_id),waiver_type,waiver_amount,reason})});
+  if(ok&&data.success){toast('Waiver applied');closeModal('modalWaiver');loadWaivers();}
+  else{document.getElementById('waiverErrMsg').textContent=data.error||'Failed.';}
+}
+
+async function searchStudentForScholarship(){
+  const roll=document.getElementById('schRoll').value.trim(); if(!roll) return;
+  const{ok,data}=await api(`/api/admin/student_by_roll?roll=${encodeURIComponent(roll)}`);
+  if(!ok){toast('Not found',data.error||'Student not found.','err');return;}
+  const s=data.student; const fees=data.fees||[];
+  document.getElementById('schStudentId').value=s.id;
+  document.getElementById('schFeeSelect').innerHTML=fees.map(f=>`<option value="${f.fee_structure_id}">${esc(f.fee_name)} · Sem ${f.semester_no}</option>`).join('');
+}
+
+async function submitScholarship(){
+  const student_id=document.getElementById('schStudentId').value,fee_structure_id=document.getElementById('schFeeSelect').value,
+        scheme_name=document.getElementById('schScheme').value,amount=parseFloat(document.getElementById('schAmount').value);
+  document.getElementById('schErrMsg').textContent='';
+  if(!student_id||!fee_structure_id||!amount){document.getElementById('schErrMsg').textContent='All fields required.';return;}
+  const{ok,data}=await api('/api/admin/add_scholarship',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({student_id:parseInt(student_id),fee_structure_id:parseInt(fee_structure_id),scheme_name,amount})});
+  if(ok&&data.success){toast('Scholarship applied');closeModal('modalScholarship');loadWaivers();}
+  else{document.getElementById('schErrMsg').textContent=data.error||'Failed.';}
+}
+
+// ═══════════════════════════════════════════════
+//  DEFAULTERS
+// ═══════════════════════════════════════════════
+async function loadDefaulters(){
+  const{ok,data}=await api('/api/admin/defaulters');
+  if(!ok){document.getElementById('defBody').innerHTML='<tr><td colspan="8"><div class="empty-state"><span class="ico">warning</span>Could not load defaulters.</div></td></tr>';return;}
+  allDefaulters=data||[]; renderDefaulters();
+}
+
+function renderDefaulters(){
+  const q=(document.getElementById('defSearch').value||'').toLowerCase();
+  const rows=allDefaulters.filter(d=>!q||[d.roll_no,d.name,d.branch,d.fee_name].some(v=>String(v||'').toLowerCase().includes(q)));
+  document.getElementById('defBody').innerHTML=rows.length?rows.map(d=>`
+    <tr>
+      <td><input type="checkbox" class="defChk" value="${d.id}"></td>
+      <td class="mono">${esc(d.roll_no)}</td>
+      <td class="fw">${esc(d.name)}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(d.branch)}</td>
+      <td style="font-size:12px">Sem ${d.semester_no} · ${esc(d.year_name)}</td>
+      <td style="font-size:11.5px;color:var(--muted)">${fmt(d.due_date)}</td>
+      <td class="amount-neg">${INR(d.pending)}</td>
+      <td><span class="badge ${d.days_overdue>30?'inactive':'due'}">${d.days_overdue} days</span></td>
+    </tr>`).join(''):`<tr><td colspan="8"><div class="empty-state"><span class="ico">check_circle</span>No defaulters found.</div></td></tr>`;
+}
+
+document.getElementById('defSearch').addEventListener('input',renderDefaulters);
+document.getElementById('defCheckAll').addEventListener('change',e=>document.querySelectorAll('.defChk').forEach(c=>c.checked=e.target.checked));
+
+document.getElementById('sendRemindersBtn').addEventListener('click',async()=>{
+  const ids=[...document.querySelectorAll('.defChk:checked')].map(c=>Number(c.value));
+  if(!ids.length){toast('No selection','Select at least one defaulter.','err');return;}
+  if(!confirm(`Send reminders to ${ids.length} students?`)) return;
+  const btn=document.getElementById('sendRemindersBtn'); btn.disabled=true;
+  const{ok,data}=await api('/api/admin/send_reminders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({student_ids:ids})});
+  if(ok&&data.success) toast('Reminders sent',`${data.sent} sent, ${data.failed} failed.`);
+  else toast('Error','Failed to send reminders.','err');
+  btn.disabled=false;
+});
+
+// ═══════════════════════════════════════════════
+//  ANALYTICS
+// ═══════════════════════════════════════════════
+async function loadBatchAnalytics(){
+  const{ok,data}=await api('/api/admin/batch_analytics');
+  document.getElementById('analyticsBody').innerHTML=ok&&data.length?data.map(b=>`
+    <tr>
+      <td class="fw">${esc(b.batch_year)}</td>
+      <td class="mono">${esc(b.college_code)}</td>
+      <td><span class="badge ${b.status==='active'?'active-s':'graduated'}">${esc(b.status)}</span></td>
+      <td>${esc(b.students)}</td>
+      <td class="amount-n">${INR(b.total_due)}</td>
+      <td class="amount-pos">${INR(b.collected)}</td>
+      <td class="amount-neg">${INR(b.pending)}</td>
+      <td><span class="badge ${b.pct>=75?'paid':b.pct>=40?'hosteler':'due'}">${b.pct}%</span></td>
+    </tr>`).join(''):`<tr><td colspan="8"><div class="empty-state"><span class="ico">analytics</span>No analytics data.</div></td></tr>`;
+}
+
+// ═══════════════════════════════════════════════
+//  PROMOTE
+// ═══════════════════════════════════════════════
+async function loadPromote(){
+  await loadYears();
+  const box=document.getElementById('promotePreviewBody');
+  try{
+    const r=await fetch('/api/promote_students_preview');
+    const d=await r.json();
+    box.innerHTML=`
+      <div class="promo-cell"><div class="promo-val">${d.year1_to_2??0}</div><div class="promo-label">Year 1 → Year 2</div></div>
+      <div class="promo-cell"><div class="promo-val">${d.year2_to_3??0}</div><div class="promo-label">Year 2 → Year 3</div></div>
+      <div class="promo-cell"><div class="promo-val" style="color:var(--teal)">${d.year3_graduate??0}</div><div class="promo-label">Year 3 → Graduated</div></div>`;
+  }catch{box.innerHTML='<div style="font-size:12px;color:var(--muted)">Could not load preview.</div>';}
+}
+
+document.getElementById('submitPromote').addEventListener('click',async()=>{
+  const yid=document.getElementById('promoteYearSel').value;
+  const msg=document.getElementById('promoteMsg'); msg.textContent='';
+  if(!yid){msg.textContent='Select a target year.';return;}
+  if(!confirm('Promote all eligible students now?')) return;
+  const btn=document.getElementById('submitPromote'); btn.disabled=true;
+  btn.innerHTML=`<span class="ico spin" style="font-size:15px">autorenew</span> Promoting…`;
+  const{ok,data}=await api('/api/promote_students',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({new_year_id:parseInt(yid)})});
+  if(ok&&data.success){toast('Done',`Promoted ${data.promoted??0}, graduated ${data.graduated??0}.`);loadPromote();loadStats();}
+  else{msg.textContent=data.error||'Error.';}
+  btn.disabled=false;
+  btn.innerHTML=`<span class="ico out" style="font-size:15px">upgrade</span> Promote All`;
+});
+
+document.getElementById('undoPromote').addEventListener('click',async()=>{
+  const yid=document.getElementById('undoYearSel').value;
+  const msg=document.getElementById('undoMsg'); msg.textContent='';
+  if(!yid){msg.textContent='Select a year.';return;}
+  if(!confirm('Undo promotion for this year?')) return;
+  const{ok,data}=await api('/api/undo_promotion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({year_id:parseInt(yid)})});
+  if(ok&&data.success) toast('Undo done');
+  else{msg.textContent=data.error||'Failed.';}
+});
+
+// ═══════════════════════════════════════════════
+//  ADMIN USERS
+// ═══════════════════════════════════════════════
+async function loadAdmins(){
+  const{ok,data}=await api('/api/admin/admins'); if(!ok) return;
+  allAdmins=data||[];
+  document.getElementById('adminsBody').innerHTML=allAdmins.length?allAdmins.map(a=>`
+    <tr>
+      <td class="fw">${esc(a.username)}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(a.email||'—')}</td>
+      <td><span class="role-badge ${a.role}">${esc(a.role)}</span></td>
+      <td><span class="badge ${a.status==='active'?'active-s':'inactive'}">${esc(a.status||'active')}</span></td>
+      <td>
+        <div class="pill-actions">
+          <button class="btn" style="font-size:11px;min-height:28px;padding:0 8px" onclick="toggleAdminStatus(${a.id},'${a.status==='active'?'inactive':'active'}')">${a.status==='active'?'Disable':'Enable'}</button>
+          <button class="btn danger" style="font-size:11px;min-height:28px;padding:0 8px" onclick="deleteAdmin(${a.id})"><span class="ico out" style="font-size:13px">delete</span></button>
+        </div>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="5"><div class="empty-state"><span class="ico">admin_panel_settings</span>No admins yet.</div></td></tr>';
+}
+
+async function submitAdmin(){
+  const username=document.getElementById('adUser').value.trim(),role=document.getElementById('adRole').value,
+        email=document.getElementById('adEmail').value.trim(),password=document.getElementById('adPass').value;
+  document.getElementById('adminErrMsg').textContent='';
+  if(!username||!password){document.getElementById('adminErrMsg').textContent='Username and password are required.';return;}
+  const{ok,data}=await api('/api/admin/create_admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,role,email,password})});
+  if(ok&&data.success){toast('Admin created');closeModal('modalAdmin');loadAdmins();}
+  else{document.getElementById('adminErrMsg').textContent=data.error||'Failed.';}
+}
+
+async function toggleAdminStatus(id,newStatus){
+  const{ok}=await api(`/api/admin/toggle_admin/${id}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:newStatus})});
+  if(ok){toast('Updated');loadAdmins();}else toast('Error','Could not update.','err');
+}
+
+async function deleteAdmin(id){
+  if(!confirm('Delete this admin?')) return;
+  const{ok}=await api(`/api/admin/delete_admin/${id}`,{method:'DELETE'});
+  if(ok){toast('Admin removed');loadAdmins();}else toast('Error','Could not delete.','err');
+}
+
+// ═══════════════════════════════════════════════
+//  AUDIT LOG
+// ═══════════════════════════════════════════════
+async function loadAudit(){
+  const{ok,data}=await api('/api/admin/audit_log'); if(!ok) return;
+  allAudit=data||[]; auditState.page=1; renderAudit();
+}
+
+function renderAudit(){
+  const q=(document.getElementById('auditSearch').value||'').toLowerCase();
+  const filtered=allAudit.filter(a=>!q||[a.action,a.admin_name,a.target_type].some(v=>String(v||'').toLowerCase().includes(q)));
+  const from=(auditState.page-1)*PER_PAGE;
+  const slice=filtered.slice(from,from+PER_PAGE);
+  document.getElementById('auditBody').innerHTML=slice.length?slice.map(a=>`
+    <tr>
+      <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${a.created_at?new Date(a.created_at).toLocaleString('en-IN'):'—'}</td>
+      <td class="fw" style="font-size:13px">${esc(a.admin_name)}</td>
+      <td><span style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue)">${esc(a.action)}</span></td>
+      <td style="font-size:12px;color:var(--muted)">${esc(a.target_type||'—')} ${a.target_id?'#'+a.target_id:''}</td>
+      <td class="mono" style="font-size:11px">${esc(a.ip_address||'—')}</td>
+    </tr>`).join(''):`<tr><td colspan="5"><div class="empty-state"><span class="ico">history</span>No audit records.</div></td></tr>`;
+  renderPagination(filtered,auditState.page,PER_PAGE,'auditNums','auditInfo',pg=>{auditState.page=pg;renderAudit();},'auditPrev','auditNext');
+}
+
+document.getElementById('auditSearch').addEventListener('input',()=>{auditState.page=1;renderAudit();});
+
+// ═══════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════
+async function loadCollegeSettings(){
+  const{ok,data}=await api('/api/admin/college_settings'); if(!ok) return;
+  document.getElementById('cgName').value=data.college_name||'';
+  document.getElementById('cgPrincipal').value=data.principal_name||'';
+  document.getElementById('cgPhone').value=data.phone||'';
+  document.getElementById('cgEmail').value=data.email||'';
+  document.getElementById('cgAddress').value=data.address||'';
+  document.getElementById('cgWebsite').value=data.website||'';
+}
+
+async function saveCollegeSettings(){
+  const payload={
+    college_name:document.getElementById('cgName').value.trim(),
+    principal_name:document.getElementById('cgPrincipal').value.trim(),
+    phone:document.getElementById('cgPhone').value.trim(),
+    email:document.getElementById('cgEmail').value.trim(),
+    address:document.getElementById('cgAddress').value.trim(),
+    website:document.getElementById('cgWebsite').value.trim()
+  };
+  const{ok}=await api('/api/admin/college_settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(ok) toast('Settings saved');else toast('Error','Could not save.','err');
+}
+
+async function changePassword(){
+  const np=document.getElementById('newPass').value;
+  const cp=document.getElementById('confirmPass').value;
+  const msg=document.getElementById('pwMsg');
+  msg.textContent=''; msg.style.color='var(--rose)';
+  if(!np||!cp){msg.textContent='Both fields required.';return;}
+  if(np!==cp){msg.textContent='Passwords do not match.';return;}
+  const{ok,data}=await api('/api/admin/change_password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({new_password:np})});
+  if(ok&&data.success){msg.textContent='Password updated successfully.';msg.style.color='var(--teal)';document.getElementById('newPass').value='';document.getElementById('confirmPass').value='';}
+  else{msg.textContent=data.error||'Failed.';}
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+loadStats();
+loadBatchAnalyticsForDash();
+</script>
+</body>
+</html>

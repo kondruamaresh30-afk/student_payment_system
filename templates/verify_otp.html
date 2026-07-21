@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Verify OTP - Academic Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      font-family: 'Public Sans', sans-serif;
+      background-color: #f7f9fb;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- Header -->
+  <header class="bg-white sticky top-0 z-50 border-b border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+    <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <div class="text-lg font-black text-[#0F172A] uppercase tracking-wider">Academic Portal</div>
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium tracking-tight">
+        <a class="text-slate-500 hover:text-slate-700 transition-colors" href="#">Directory</a>
+        <a class="text-slate-500 hover:text-slate-700 transition-colors" href="#">Resources</a>
+        <a class="text-slate-500 hover:text-slate-700 transition-colors" href="#">Contact</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <button class="text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors">Support</button>
+        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+          <img
+            alt="University Seal"
+            class="w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnHSiyZDnajVOAAGoRlq7I0BmoBZn_3JjODJrC6h_LnGBN9n8txMLgCZM3YAWtgFHWw60OAmzBn4ErvMpnwAPhwux8AMRBEmCcywtb7SIkdk3St8yTk1yeiBCeAZjBfC7cvF6SmX7vvTRYL4k3OkHEZMA_hHB6hO3a1aruGiCscw47GydxD2nvSflUJz4XL_bCmpQITFEdWXcwmi6v4ReMNyVk7LKA8AWtKx3JJpsIXJgJxPxEz0xHfJrahtkHSCwibZgcyOyCJEE"
+          />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-grow flex items-center justify-center px-6 py-12">
+    <div class="w-full max-w-[440px] flex flex-col items-center">
+
+      <!-- Icon -->
+      <div class="mb-8 w-16 h-16 bg-[#131b2e] rounded-lg flex items-center justify-center shadow-lg">
+        <span class="material-symbols-outlined text-white text-3xl">lock</span>
+      </div>
+
+      <!-- Card -->
+      <div class="w-full bg-white border border-[#E2E8F0] rounded shadow-[0_4px_12px_rgba(15,23,42,0.08)] p-10">
+        <div class="mb-8 text-center">
+          <h1 class="text-[30px] leading-[38px] font-bold tracking-tight text-[#0F172A] mb-2">Verify OTP</h1>
+          <p class="text-sm text-slate-500">Check your email and enter the OTP</p>
+        </div>
+
+        <form action="/verify_otp" method="POST" class="flex flex-col gap-5">
+          <input name="email" type="hidden" value="{{ email }}"/>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-slate-700" for="otp">Verification Code</label>
+            <input
+              class="w-full px-4 py-3 rounded border border-slate-200 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#131b2e] focus:ring-2 focus:ring-[#131b2e]/10 transition-all"
+              id="otp" name="otp" type="text" placeholder="Enter OTP" required
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-3 bg-[#131b2e] text-white font-semibold text-[15px] rounded hover:bg-[#1E293B] transition-all shadow-sm"
+          >
+            Verify
+          </button>
+
+          <div class="text-center">
+            <p class="text-sm text-slate-500">
+              Didn't receive a code?
+              <a href="/resend_otp?email={{ email }}"
+   class="text-[#0F172A] font-semibold hover:underline underline-offset-4 ml-1">
+   Resend code
+</a>
+            </p>
+          </div>
+        </form>
+
+        <!-- Footer accent -->
+        <div class="mt-10 pt-6 border-t border-slate-100 flex items-center justify-center gap-3">
+          <span class="material-symbols-outlined text-slate-400 text-[18px]">verified_user</span>
+          <span class="text-[11px] font-medium text-slate-400 uppercase tracking-widest">Secure Verification System</span>
+        </div>
+      </div>
+
+      <!-- Back link -->
+      <a class="mt-8 flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#0F172A] transition-colors" href="/">
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Back to Sign In
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-100">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-6 gap-4 max-w-7xl mx-auto text-xs">
+      <div class="text-slate-400">© 2024 Institute of Digital Excellence. All rights reserved.</div>
+      <nav class="flex items-center gap-6">
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Privacy Policy</a>
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Terms of Service</a>
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Security</a>
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Accessibility</a>
+      </nav>
+    </div>
+  </footer>
+
+</body>
+</html>

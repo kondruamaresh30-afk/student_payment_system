@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Academic Portal - Secure Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary-fixed": "#dae2fd",
+            "on-primary-fixed": "#131b2e",
+            "surface": "#f7f9fb",
+            "on-surface": "#191c1e",
+          },
+          fontFamily: {
+            sans: ["Public Sans", "sans-serif"],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      background-color: #f7f9fb;
+    }
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .flash-msg { animation: slide-in 0.2s ease; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-['Public_Sans'] text-[#191c1e] selection:bg-[#dae2fd] selection:text-[#131b2e]">
+
+  <!-- Header -->
+  <header class="bg-white sticky top-0 z-50 border-b border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+    <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-[#0F172A] flex items-center justify-center rounded">
+          <span class="material-symbols-outlined text-white">account_balance</span>
+        </div>
+        <span class="text-lg font-black text-[#0F172A] uppercase tracking-wider">Academic Portal</span>
+      </div>
+      <div class="md:hidden">
+        <span class="material-symbols-outlined text-slate-600">menu</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-grow flex flex-col items-center justify-center px-6 py-12">
+
+    <!-- ✅ FIX 3: Flash messages block (Jinja2) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="w-full max-w-[440px] mb-4 space-y-2">
+          {% for category, message in messages %}
+            {% set styles = {
+              'error':   'bg-red-50 border-red-200 text-red-700',
+              'warning': 'bg-amber-50 border-amber-200 text-amber-700',
+              'success': 'bg-green-50 border-green-200 text-green-700',
+              'info':    'bg-blue-50 border-blue-200 text-blue-700'
+            } %}
+            {% set icons = {
+              'error':   'error',
+              'warning': 'warning',
+              'success': 'check_circle',
+              'info':    'info'
+            } %}
+            <div class="flash-msg flex items-start gap-3 border rounded-lg px-4 py-3 text-sm font-medium {{ styles.get(category, styles['info']) }}">
+              <span class="material-symbols-outlined text-[18px] mt-0.5 flex-shrink-0">{{ icons.get(category, 'info') }}</span>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="w-full max-w-[440px] bg-white border border-[#E2E8F0] shadow-[0_8px_30px_rgb(15,23,42,0.08)] rounded-lg overflow-hidden">
+      <div class="p-10">
+
+        <!-- Card Header -->
+        <div class="mb-8 text-center">
+          <img
+            alt="University Logo"
+            class="h-16 mx-auto mb-6"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeBxWWjZqWCpv-h2dq9kwIMelzMB2kEHoyWWW0YfHKQimDD9oerc72Wcx2akbLVvAJiX-d-Mn2T_uo8x7ksmF0-ZSxEKlvaCPm8uAObXDiN1dpDsZKTDJyTj5uCQAAzvuJ-YAKTWkpPSG5V2earRDL4APoKB_ID5roEJeT8veTtkIvTqFlp_Tpa07OlPEobCm_2Z7qDf2ejXh-PTs6KQq22KvdZDuv8u1ee8oVdjaWN3N6v99bxzh7J9w8eRE2HOGMGjAc7PTFZXw"
+          />
+          <h1 class="text-[30px] leading-[38px] font-bold tracking-tight text-[#0F172A] mb-2">Welcome Back</h1>
+          <p class="text-sm text-slate-500">Access your digital academic ecosystem.</p>
+        </div>
+
+        <!-- ✅ FIX 1: Form action changed from "#" to "/" (Flask login route) -->
+        <form action="/" method="POST" class="space-y-5">
+
+          <!-- ✅ CSRF token for security -->
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+          <!-- Username / Email -->
+          <div class="space-y-2">
+            <label class="text-sm font-semibold text-slate-700 block" for="username">Identity</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F172A] transition-colors">person</span>
+              <!-- ✅ FIX 4: Placeholder updated to reflect email/username both work -->
+              <input
+                class="w-full pl-10 pr-4 py-3 bg-white border border-[#E2E8F0] rounded text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/5 transition-all"
+                id="username" name="username" type="text" placeholder="Email address or Username" required autocomplete="username"
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="text-sm font-semibold text-slate-700 block" for="password">Security Key</label>
+              <a class="text-sm text-[#0F172A] hover:underline" href="/forgot">Forgot?</a>
+            </div>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#0F172A] transition-colors">lock</span>
+              <input
+                class="w-full pl-10 pr-12 py-3 bg-white border border-[#E2E8F0] rounded text-base text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/5 transition-all"
+                id="password" name="password" type="password" placeholder="Password" required autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                onclick="togglePassword()"
+              >
+                <span class="material-symbols-outlined text-[20px]" id="toggle-icon">visibility_off</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ✅ FIX 2: Remember me checkbox — added name="remember" so Flask receives it -->
+          <div class="flex items-center gap-3 pt-2">
+            <input class="w-4 h-4 rounded border-slate-300 text-[#0F172A] focus:ring-[#0F172A]"
+                   id="remember" name="remember" type="checkbox" value="1"/>
+            <label class="text-sm text-slate-600" for="remember">Keep me authenticated on this device</label>
+          </div>
+
+          <!-- Submit -->
+          <div class="pt-4">
+            <button
+              type="submit"
+              class="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold text-[15px] py-4 rounded shadow-lg shadow-slate-200 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              Login
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- SSO -->
+        <div class="mt-8">
+          <div class="relative flex items-center mb-6">
+            <div class="flex-grow border-t border-slate-100"></div>
+            <span class="flex-shrink mx-4 text-slate-400 text-xs font-medium uppercase tracking-widest">Institution SSO</span>
+            <div class="flex-grow border-t border-slate-100"></div>
+          </div>
+          <button class="w-full border border-slate-200 hover:bg-slate-50 py-3 rounded font-semibold text-[15px] text-slate-700 flex items-center justify-center gap-3 transition-colors">
+            <img
+              alt="Google Icon"
+              class="w-5 h-5"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXvL4KyTGUnqmWze-gy8quTJUzykrUWMVPzvynZbj3C8DzF_4U1mmuADFeforHJfia8hNbhSLnG-W4xL8_S8Pz07_jYsWt_EVXdNuU4bt3tZxF3-F8njOVMlrlY2GfS8g6hg-ityhCMriaQt67JqEyHztuujgM-zPDfgPKLOwrGyLBVSGKvW0jVGA921kUBGgJidiFflfg9F8lSf6HP9Eb1_CR3g1DYLfEbJgnDKc4MjApjJaGZOGyX3-6-ALDqd4a0g9V-ti3S8E"
+            />
+            Sign in with EduCloud
+          </button>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="bg-slate-50 px-8 py-4 border-t border-slate-100 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px] text-slate-400">verified_user</span>
+        <span class="text-[11px] font-medium text-slate-500 uppercase tracking-widest">End-to-end encrypted session</span>
+      </div>
+    </div>
+
+    <!-- Help link -->
+    <div class="mt-8 text-center">
+      <p class="text-sm text-slate-500">
+        New to the portal? <a class="text-[#0F172A] font-semibold hover:underline" href="#">Request account access</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-100">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-6 gap-4 max-w-7xl mx-auto text-xs">
+      <div class="text-slate-400">© 2024 Institute of Digital Excellence. All rights reserved.</div>
+      <nav class="flex items-center gap-6">
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Privacy Policy</a>
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Terms of Service</a>
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Security</a>
+        <a class="text-slate-400 hover:text-slate-600 transition-colors" href="#">Accessibility</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const icon = document.getElementById('toggle-icon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility_off';
+      }
+    }
+  </script>
+
+</body>
+</html>

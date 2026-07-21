@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Student Dashboard | Academic Portal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body { font-family: 'Public Sans', sans-serif; background-color: #f7f9fb; }
+
+    .stat-card { transition: box-shadow 0.2s, transform 0.2s; }
+    .stat-card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.10); transform: translateY(-2px); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white sticky top-0 z-50 border-b border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
+    <div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-[#0F172A] flex items-center justify-center rounded">
+          <span class="material-symbols-outlined text-white">account_balance</span>
+        </div>
+        <span class="text-lg font-black text-[#0F172A] uppercase tracking-wider">Academic Portal</span>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a class="text-slate-500 hover:text-slate-700 transition-colors" href="#">Fees</a>
+        <a class="text-slate-500 hover:text-slate-700 transition-colors" href="#">Results</a>
+        <a class="text-slate-500 hover:text-slate-700 transition-colors" href="#">Timetable</a>
+        <a class="text-slate-500 hover:text-slate-700 transition-colors" href="#">Support</a>
+      </nav>
+
+      <!-- User Menu -->
+      <div class="flex items-center gap-3">
+        <div class="hidden md:flex flex-col items-end">
+          <span class="text-sm font-semibold text-[#0F172A]">{{ session['user'] | default('Student') }}</span>
+          <span class="text-xs text-slate-400">Student</span>
+        </div>
+        <div class="w-9 h-9 rounded-full bg-[#0F172A] flex items-center justify-center text-white font-bold text-sm">
+          S
+        </div>
+        <a
+          href="/logout"
+          class="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-200 hover:bg-red-50 px-3 py-2 rounded transition-all"
+          onclick="return confirm('Are you sure you want to logout?')"
+        >
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+          <span class="hidden md:inline">Logout</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  <div class="max-w-7xl mx-auto w-full px-6 pt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flex items-center gap-3 px-4 py-3 rounded border mb-3
+          {% if category == 'error' %} bg-red-50 border-red-200 text-red-700
+          {% elif category == 'success' %} bg-green-50 border-green-200 text-green-700
+          {% else %} bg-blue-50 border-blue-200 text-blue-700 {% endif %}">
+          <span class="material-symbols-outlined text-[18px]">
+            {% if category == 'error' %}error{% elif category == 'success' %}check_circle{% else %}info{% endif %}
+          </span>
+          <span class="text-sm font-medium">{{ message }}</span>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-8">
+
+    <!-- Welcome Banner -->
+    <div class="bg-[#0F172A] rounded-xl px-8 py-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <p class="text-slate-400 text-sm mb-1">Welcome back,</p>
+        <h1 class="text-white text-2xl font-bold">{{ session['user'] | default('Student') }}</h1>
+        <p class="text-slate-400 text-sm mt-1">Academic Year 2024–25 · Semester II</p>
+      </div>
+      <div class="flex items-center gap-2 bg-white/10 text-white text-sm px-4 py-2 rounded-lg">
+        <span class="material-symbols-outlined text-[18px] text-green-400">circle</span>
+        Session Active
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+      <div class="stat-card bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Total Fees</span>
+          <span class="material-symbols-outlined text-[20px] text-slate-300">account_balance_wallet</span>
+        </div>
+        <p class="text-2xl font-bold text-[#0F172A]">₹45,000</p>
+        <p class="text-xs text-slate-400 mt-1">Annual tuition</p>
+      </div>
+
+      <div class="stat-card bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Paid</span>
+          <span class="material-symbols-outlined text-[20px] text-green-400">check_circle</span>
+        </div>
+        <p class="text-2xl font-bold text-green-600">₹30,000</p>
+        <p class="text-xs text-slate-400 mt-1">Last paid: Jan 2025</p>
+      </div>
+
+      <div class="stat-card bg-white border border-red-100 rounded-lg p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Due</span>
+          <span class="material-symbols-outlined text-[20px] text-red-400">warning</span>
+        </div>
+        <p class="text-2xl font-bold text-red-600">₹15,000</p>
+        <p class="text-xs text-red-400 mt-1">Due: 31 Mar 2025</p>
+      </div>
+
+      <div class="stat-card bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Attendance</span>
+          <span class="material-symbols-outlined text-[20px] text-blue-400">calendar_month</span>
+        </div>
+        <p class="text-2xl font-bold text-[#0F172A]">82%</p>
+        <p class="text-xs text-slate-400 mt-1">This semester</p>
+      </div>
+
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Payment History -->
+      <div class="lg:col-span-2 bg-white border border-slate-200 rounded-lg shadow-sm">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2 class="text-sm font-bold text-[#0F172A] uppercase tracking-wider">Payment History</h2>
+          <a href="#" class="text-xs text-slate-400 hover:text-[#0F172A] font-medium transition-colors">View all</a>
+        </div>
+        <div class="divide-y divide-slate-50">
+          {% set payments = [
+            ('Tuition Fee – Sem I', '₹22,500', 'Jul 2024', 'Paid'),
+            ('Transport Fee',       '₹4,500',  'Jul 2024', 'Paid'),
+            ('Library Fee',        '₹500',    'Jul 2024', 'Paid'),
+            ('Tuition Fee – Sem II','₹22,500', 'Jan 2025', 'Paid'),
+            ('Exam Fee',           '₹1,200',  'Mar 2025', 'Due'),
+          ] %}
+          {% for name, amount, date, status in payments %}
+          <div class="flex items-center justify-between px-6 py-4">
+            <div>
+              <p class="text-sm font-medium text-[#0F172A]">{{ name }}</p>
+              <p class="text-xs text-slate-400 mt-0.5">{{ date }}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-semibold text-[#0F172A]">{{ amount }}</span>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full
+                {% if status == 'Paid' %} bg-green-50 text-green-700
+                {% else %} bg-red-50 text-red-600 {% endif %}">
+                {{ status }}
+              </span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Quick Actions + Info -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Quick Actions -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+          <h2 class="text-sm font-bold text-[#0F172A] uppercase tracking-wider mb-4">Quick Actions</h2>
+          <div class="flex flex-col gap-2">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all group">
+              <span class="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-[#0F172A] transition-colors">receipt_long</span>
+              <span class="text-sm font-medium text-slate-600 group-hover:text-[#0F172A] transition-colors">Download Receipt</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all group">
+              <span class="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-[#0F172A] transition-colors">payments</span>
+              <span class="text-sm font-medium text-slate-600 group-hover:text-[#0F172A] transition-colors">Pay Due Fees</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all group">
+              <span class="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-[#0F172A] transition-colors">id_card</span>
+              <span class="text-sm font-medium text-slate-600 group-hover:text-[#0F172A] transition-colors">View ID Card</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all group">
+              <span class="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-[#0F172A] transition-colors">help_outline</span>
+              <span class="text-sm font-medium text-slate-600 group-hover:text-[#0F172A] transition-colors">Raise a Query</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Student Info -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+          <h2 class="text-sm font-bold text-[#0F172A] uppercase tracking-wider mb-4">Student Info</h2>
+          <dl class="space-y-3">
+            <div class="flex justify-between">
+              <dt class="text-xs text-slate-400">Roll No.</dt>
+              <dd class="text-xs font-semibold text-[#0F172A]">22CS0042</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-xs text-slate-400">Branch</dt>
+              <dd class="text-xs font-semibold text-[#0F172A]">Computer Science</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-xs text-slate-400">Year</dt>
+              <dd class="text-xs font-semibold text-[#0F172A]">III Year</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-xs text-slate-400">Section</dt>
+              <dd class="text-xs font-semibold text-[#0F172A]">A</dd>
+            </div>
+          </dl>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-100 mt-8">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-5 gap-4 max-w-7xl mx-auto text-xs text-slate-400">
+      <p>© 2024 Institute of Digital Excellence. All rights reserved.</p>
+      <nav class="flex gap-6">
+        <a class="hover:text-slate-600 transition-colors" href="#">Privacy</a>
+        <a class="hover:text-slate-600 transition-colors" href="#">Terms</a>
+        <a class="hover:text-slate-600 transition-colors" href="#">Security</a>
+      </nav>
+    </div>
+  </footer>
+
+</body>
+</html>
